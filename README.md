@@ -109,7 +109,7 @@ NotifierConsumer<CounterNotifier, int>(
 
 ## Contributing
 
-Contributions are welcome! Please open issues or pull requests on [GitHub](https://github.com/syncx/syncx).
+Contributions are welcome! Please open issues or pull requests on [GitHub](https://github.com/sidha6th/sync-x).
 
 ---
 
@@ -119,4 +119,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-If you have questions or need help, please open an issue or start a discussion on GitHub.
+If you have questions or need help, please open an issue or start a discussion on [GitHub](https://github.com/sidha6th/sync-x).
