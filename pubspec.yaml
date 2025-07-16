@@ -1,0 +1,47 @@
+name: syncx
+
+description: >
+  A lightweight, flexible state management solution for Flutter, providing notifiers, builders, and consumers for reactive UI updates with minimal boilerplate.
+
+version: 0.0.1
+
+homepage: https://github.com/syncx/syncx
+repository: https://github.com/syncx/syncx
+issue_tracker: https://github.com/syncx/syncx/issues
+documentation: https://github.com/syncx/syncx#readme
+
+topics:
+  - state-management
+  - notifier
+  - provider
+  - light-bloc
+  - reactive
+
+platforms:
+  android:
+  ios:
+  web:
+  macos:
+  windows:
+  linux:
+
+environment:
+  sdk: ">=3.8.1 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter: { sdk: flutter }
+  provider: ^6.1.5
+
+dev_dependencies:
+  flutter_test: { sdk: flutter }
+  flutter_lints: ^5.0.0
+
+# Exclude files from the published package
+# (add more patterns as needed)
+#
+# files:
+#   - lib/
+#   - README.md
+#   - CHANGELOG.md
+#   - LICENSE
