@@ -1,5 +1,5 @@
 /// Represents error information for an asynchronous operation.
-base class ErrorState {
+class ErrorState {
   /// Creates an [ErrorState] with the given [error], optional [message], and [stackTrace].
   const ErrorState(this.error, {this.message, this.stackTrace});
 

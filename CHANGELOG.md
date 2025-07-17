@@ -1,3 +1,8 @@
+## 0.0.3
+
+- Lowered Dart SDK minimum version to >=2.17.0 for broader compatibility with more Flutter projects.
+- Updated pubspec and documentation to reflect compatibility improvements.
+
 ## 0.0.2
 
 - Improved async state handling: `AsyncNotifier` now supports async `onInit` returning a Future.

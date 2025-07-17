@@ -8,7 +8,7 @@ import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 /// its child whenever the state changes, optionally using [buildWhen] to control rebuilds.
 ///
 /// [N] is the type of [BaseNotifier] and [S] is the type of state managed by the notifier.
-final class NotifierBuilder<N extends BaseNotifier<S>, S>
+class NotifierBuilder<N extends BaseNotifier<S>, S>
     extends BaseNotifierBuilder<N, S> {
   /// Creates a [NotifierBuilder].
   ///

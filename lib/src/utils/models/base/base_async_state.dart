@@ -5,7 +5,7 @@ import 'package:syncx/src/utils/models/error_state.dart';
 /// [IAsyncState] provides a common interface for loading, data, and error states.
 ///
 /// [S] is the type of data managed by the state.
-abstract base class IAsyncState<S extends Object?> {
+abstract class IAsyncState<S extends Object?> {
   /// Creates an [IAsyncState] with optional [data] and [errorState].
   const IAsyncState({this.data, this.errorState});
 
@@ -13,7 +13,9 @@ abstract base class IAsyncState<S extends Object?> {
   const IAsyncState.data(this.data) : errorState = null;
 
   /// Creates a loading state.
-  const IAsyncState.loading() : data = null, errorState = null;
+  const IAsyncState.loading()
+      : data = null,
+        errorState = null;
 
   /// Creates an error state with the given [errorState].
   const IAsyncState.error(ErrorState this.errorState) : data = null;

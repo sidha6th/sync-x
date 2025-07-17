@@ -10,7 +10,7 @@
 /// - Provider integration and easy registration
 ///
 /// See the package README and example for usage details.
-library;
+library syncX;
 
 export 'package:provider/provider.dart';
 

@@ -7,7 +7,7 @@ import 'package:syncx/src/utils/extensions/build_context_extensions.dart';
 /// when its state changes. Intended to be extended by more specific notifier builders.
 ///
 /// [N] is the type of [BaseNotifier] and [S] is the type of state managed by the notifier.
-abstract base class BaseNotifierBuilder<N extends BaseNotifier<S>, S>
+abstract class BaseNotifierBuilder<N extends BaseNotifier<S>, S>
     extends StatefulWidget {
   /// Creates a [BaseNotifierBuilder].
   ///

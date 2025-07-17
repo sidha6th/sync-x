@@ -7,20 +7,26 @@ import 'package:syncx/src/utils/models/error_state.dart';
 /// It provides factory constructors for loading, data, and error states, and utility methods to transition between them.
 ///
 /// [S] is the type of data managed by the state.
-base class AsyncState<S extends Object?> extends IAsyncState<S> {
+class AsyncState<S extends Object?> extends IAsyncState<S> {
   /// Creates a loading state.
-  const AsyncState.loading() : _isLoading = true, super.loading();
+  const AsyncState.loading()
+      : _isLoading = true,
+        super.loading();
 
   /// Creates a data state with the given [data].
-  const AsyncState.data(super.data) : _isLoading = false, super.data();
+  const AsyncState.data(super.data)
+      : _isLoading = false,
+        super.data();
 
   /// Creates an error state with the given [errorState].
-  const AsyncState.error(super.errorState) : _isLoading = false, super.error();
+  const AsyncState.error(super.errorState)
+      : _isLoading = false,
+        super.error();
 
   /// Internal constructor for custom state transitions.
   const AsyncState._({super.data, super.errorState, bool isLoading = false})
-    : _isLoading = isLoading,
-      super();
+      : _isLoading = isLoading,
+        super();
 
   /// Whether the state is currently loading.
   final bool _isLoading;

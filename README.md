@@ -22,7 +22,7 @@ Add SyncX to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  syncx: ^0.0.1
+  syncx: ^0.0.3
 ```
 
 Then run:
