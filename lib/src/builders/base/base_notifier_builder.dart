@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart'
     show StatefulWidget, Widget, BuildContext, VoidCallback, State, SizedBox;
-import 'package:provider/provider.dart' show Provider;
-import 'package:syncx/src/notifier/notifier.dart' show BaseNotifier;
+import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
+import 'package:syncx/src/utils/extensions/build_context_extensions.dart';
 
 /// A base class for building widgets that listen to a [BaseNotifier] and rebuild
 /// when its state changes. Intended to be extended by more specific notifier builders.
@@ -16,10 +16,10 @@ abstract base class BaseNotifierBuilder<N extends BaseNotifier<S>, S>
   /// [onInit] is an optional callback invoked with the notifier when the widget is initialized.
   /// [builder] is a function that builds the widget tree based on the current state.
   const BaseNotifierBuilder({
-    this.child,
-    this.onInit,
-    this.builder,
     this.notifier,
+    this.builder,
+    this.onInit,
+    this.child,
     super.key,
   });
 
@@ -49,7 +49,7 @@ abstract base class BaseNotifierBuilder<N extends BaseNotifier<S>, S>
 class _BaseNotifierBuilderState<N extends BaseNotifier<S>, S>
     extends State<BaseNotifierBuilder<N, S>> {
   /// The notifier instance being listened to. Initialized from the widget or the nearest Provider.
-  late N notifier = widget.notifier ?? Provider.of<N>(context, listen: false);
+  late N notifier = widget.notifier ?? context.get<N>();
 
   /// The previous state, used to compare with the current state on changes.
   late S _previous = notifier.state;

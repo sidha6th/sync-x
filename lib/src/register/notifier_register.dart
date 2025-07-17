@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart'
     show StatelessWidget, BuildContext, Widget;
 import 'package:provider/provider.dart' show ChangeNotifierProvider;
-import 'package:syncx/src/notifier/notifier.dart' show BaseNotifier;
+import 'package:syncx/src/notifier/base/base_notifier.dart';
 
 /// A widget that registers a [BaseNotifier] in the widget tree using [ChangeNotifierProvider].
 ///

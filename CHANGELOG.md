@@ -1,3 +1,10 @@
+## 0.0.2
+
+- Improved async state handling: `AsyncNotifier` now supports async `onInit` returning a Future.
+- Updated documentation and README for clarity and conciseness.
+- Example app refactored for modularity and better demonstration of both sync and async notifiers.
+- Minor API and doc improvements for lifecycle mixins and async state.
+
 ## 0.0.1
 
 - Initial release of SyncX.
