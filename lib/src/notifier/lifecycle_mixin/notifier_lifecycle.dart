@@ -10,6 +10,7 @@ mixin NotifierLifecycle {
   }
 
   @protected
+
   /// Called when the notifier is initialized.
   /// Override this to perform setup logic.
   void onInit() {}

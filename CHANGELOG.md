@@ -1,3 +1,7 @@
+## 0.0.4
+
+- Fix: Format
+
 ## 0.0.3
 
 - Lowered Dart SDK minimum version to >=2.17.0 for broader compatibility with more Flutter projects.

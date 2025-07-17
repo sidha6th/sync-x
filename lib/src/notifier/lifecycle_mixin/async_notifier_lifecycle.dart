@@ -10,6 +10,7 @@ mixin AsyncNotifierLifecycle<S> {
   }
 
   @protected
+
   /// Called when the notifier is initialized.
   /// Override this to perform async setup, such as fetching data or starting listeners.
   Future<AsyncState<S>> onInit();

@@ -13,9 +13,9 @@ abstract class AsyncNotifier<S> extends BaseNotifier<AsyncState<S>>
   /// If [state] is null, the notifier starts in the loading state.
   /// Otherwise, it starts with the provided data state.
   AsyncNotifier([S? state])
-    : super(
-        state == null ? const AsyncState.loading() : AsyncState.data(state),
-      ) {
+      : super(
+          state == null ? const AsyncState.loading() : AsyncState.data(state),
+        ) {
     _initialize();
   }
 }
