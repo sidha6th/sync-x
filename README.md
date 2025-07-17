@@ -12,6 +12,7 @@ A lightweight, flexible state management solution for Flutter, providing notifie
 - 🏗️ **Builder widgets**: Easily rebuild UI in response to state changes.
 - 👂 **Listener widgets**: React to state changes with side effects.
 - 🪶 **Minimal boilerplate**: Focus on your app logic, not on wiring up state.
+- ⚡ **Async state support**: Built-in support for loading, data, and error states in async flows.
 
 ---
 
@@ -32,25 +33,40 @@ flutter pub get
 
 ---
 
-## Usage
+## Core Concepts & Usage
 
 ### 1. Create a Notifier
 
-Extend `Notifier<T>` or `BaseNotifier<T>` to define your state logic:
+A Notifier holds and updates your state:
 
 ```dart
-import 'package:syncx/syncx.dart';
-
 class CounterNotifier extends Notifier<int> {
   CounterNotifier() : super(0);
-
   void increment() => setState(state + 1);
+}
+```
+
+For async state (loading/data/error):
+
+```dart
+class GreetingAsyncNotifier extends AsyncNotifier<String> {
+  GreetingAsyncNotifier() : super();
+
+  @override
+  Future<AsyncState<String>> onInit() async {
+    // Consider this as a Network call
+    await Future.delayed(const Duration(seconds: 2));
+    if (success...) {
+      return const AsyncState.data('Hello from AsyncNotifier!');
+    }
+    return const AsyncState.error(ErrorState('Failed to load greeting'));
+  }
 }
 ```
 
 ### 2. Register the Notifier
 
-Wrap your widget tree with `NotifierRegister`:
+Register your notifier at the root of your widget tree:
 
 ```dart
 NotifierRegister<CounterNotifier, int>(
@@ -59,49 +75,82 @@ NotifierRegister<CounterNotifier, int>(
 )
 ```
 
-### 3. Consume the Notifier
+You can nest registers for multiple notifiers:
 
-#### a) Rebuild UI on State Change
+```dart
+NotifierRegister<CounterNotifier, int>(
+  create: (_) => CounterNotifier(),
+  child: NotifierRegister<GreetingAsyncNotifier, AsyncState<String>>(
+    create: (_) => GreetingAsyncNotifier(),
+    child: MyApp(),
+  ),
+)
+```
 
-You can control when the UI rebuilds using the `buildWhen` parameter:
+### 3. Consume State with Builders & Listeners
+
+**Rebuild UI on State Change:**
 
 ```dart
 NotifierBuilder<CounterNotifier, int>(
-  buildWhen: (previous, current) => previous != current, // Only rebuild if state actually changes
   builder: (context, count) => Text('Count: $count'),
 )
 ```
 
-#### b) Listen for State Changes (side effects)
+**Control rebuilds:**
 
-You can control when the listener is triggered using the `listenWhen` parameter:
+```dart
+NotifierBuilder<CounterNotifier, int>(
+  buildWhen: (prev, curr) => prev != curr,
+  builder: (context, count) => Text('Count: $count'),
+)
+```
+
+**Listen for Side Effects:**
 
 ```dart
 NotifierListener<CounterNotifier, int>(
-  listenWhen: (previous, current) => current % 2 == 0, // Only listen when count is even
-  listener: (count) => print('Count changed to even: $count'),
+  listenWhen: (prev, curr) => curr % 2 == 0,
+  listener: (count) => print('Count is even: $count'),
   child: MyWidget(),
 )
 ```
 
-#### c) Combine Build and Listen
-
-You can use both `buildWhen` and `listenWhen` for fine-grained control:
+**Combine Build and Listen:**
 
 ```dart
 NotifierConsumer<CounterNotifier, int>(
-  buildWhen: (previous, current) => previous != current, // Only rebuild if state actually changes
-  listenWhen: (previous, current) => current > previous, // Only listen when count increases
   builder: (context, count) => Text('Count: $count'),
-  listener: (count) => print('Count increased: $count'),
+  listener: (count) => print('Count changed: $count'),
+)
+```
+
+**Async State Handling:**
+
+```dart
+NotifierBuilder<GreetingAsyncNotifier, AsyncState<String>>(
+  builder: (context, state) => state.when(
+    loading: () => CircularProgressIndicator(),
+    data: (greeting) => Text(greeting),
+    error: (e) => Text('Error: ${e.message ?? e.error}'),
+  ),
 )
 ```
 
 ---
 
+## Usage Patterns
+
+- **Rebuild UI on State Change**: Use `NotifierBuilder` with `buildWhen` for fine-grained rebuild control.
+- **Listen for Side Effects**: Use `NotifierListener` with `listenWhen` for side-effect logic.
+- **Combine Build and Listen**: Use `NotifierConsumer` for both UI and side effects.
+- **Async State Handling**: Use `AsyncNotifier` and `AsyncState` for loading, data, and error flows.
+
+---
+
 ## Future Plans
 
-- **Built-in async and stream support in notifiers** for easy loading and error state management.
+- **Built-in stream support in notifiers** for easy loading and error state management.
 - **Top-level observer support** to monitor state changes across the app.
 - **Migrate dependency injection (DI) from provider to a custom DI implementation** for more flexibility and control.
 

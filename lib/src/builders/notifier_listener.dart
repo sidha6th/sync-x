@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart' show Widget, VoidCallback;
-import 'package:syncx/src/builders/base_notifier_builder.dart';
-import 'package:syncx/src/notifier/notifier.dart' show BaseNotifier;
+import 'package:syncx/src/builders/base/base_notifier_builder.dart';
+import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 
 /// A widget that listens to state changes from a [BaseNotifier] and triggers side effects.
 ///
@@ -21,6 +21,7 @@ final class NotifierListener<N extends BaseNotifier<S>, S>
     required Widget super.child,
     required this.listener,
     this.listenWhen,
+    super.notifier,
     super.onInit,
     super.key,
   });

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart' show BuildContext, Widget, VoidCallback;
-import 'package:syncx/src/builders/base_notifier_builder.dart';
-import 'package:syncx/src/notifier/notifier.dart' show BaseNotifier;
+import 'package:syncx/src/builders/base/base_notifier_builder.dart';
+import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 
 /// A widget that rebuilds when the state of the provided [BaseNotifier] changes.
 ///
@@ -18,6 +18,7 @@ final class NotifierBuilder<N extends BaseNotifier<S>, S>
   /// [key] is the widget key.
   const NotifierBuilder({
     required Widget Function(BuildContext, S) super.builder,
+    super.notifier,
     this.buildWhen,
     super.onInit,
     super.key,
