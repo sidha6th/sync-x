@@ -91,7 +91,7 @@ class CounterNotifier extends Notifier<int> {
   /// Use [setState] to update the state and notify any listening widgets.
   ///
   /// [setState] also accepts two optional parameters:
-  ///   - [forced] (default: false): Forces the state update even if the value hasn't changed, useful for manipulating iterable state.
+  ///   - [forced] (default: false): Forces the state update even if the value hasn't changed, useful for mutating iterable state.
   ///   - [notify] (default: true): Controls whether listeners are notified and the UI is rebuilt.
   void increment() => setState(state + 1);
 }
