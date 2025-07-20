@@ -5,11 +5,11 @@ part of '../base/base_notifier.dart';
 /// Use this mixin to add initialization and disposal logic to notifiers that manage async operations.
 /// Intended to be used with notifiers that require setup or cleanup, such as starting or cancelling streams.
 mixin AsyncNotifierLifecycle<S> {
-  void _initialize() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => onInit());
+  void _initialize(void Function(AsyncState<S> state) whenCompleted) {
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => onInit().then(whenCompleted),
+    );
   }
-
-  @protected
 
   /// Called when the notifier is first initialized and attached to the widget tree.
   ///
@@ -30,5 +30,6 @@ mixin AsyncNotifierLifecycle<S> {
   /// ```
   ///
   /// Returns a [Future] that completes with the new [AsyncState] for the notifier.
+  @protected
   Future<AsyncState<S>> onInit();
 }

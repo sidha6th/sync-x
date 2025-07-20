@@ -6,16 +6,19 @@ import 'package:flutter/foundation.dart'
         mustCallSuper,
         describeIdentity;
 import 'package:flutter/widgets.dart' show WidgetsBinding;
+import 'package:meta/meta.dart' show internal;
 import 'package:syncx/src/utils/models/async_state.dart';
+import 'package:syncx/src/utils/models/base/base_async_state.dart';
 
 part '../async_notifier.dart';
 part '../lifecycle_mixin/async_notifier_lifecycle.dart';
 part '../lifecycle_mixin/notifier_lifecycle.dart';
 part '../notifier.dart';
 
-/// The base class show ChangeNotifier, VoidCallback, describeIdentity, kFlutterMemoryAllocationsEnabled, mustCallSuper, protecteds intended to be extended by more specific notifier implementations.
+/// The base class show ChangeNotifier, VoidCallback, describeIdentity, kFlutterMemoryAllocationsEnabled, mustCallSuper, protected intended to be extended by more specific notifier implementations.
 ///
 /// [S] is the type of state managed by the notifier.
+@internal
 abstract class BaseNotifier<S extends Object?> with ChangeNotifier {
   /// Creates a [BaseNotifier] with the given initial state.
   ///
@@ -30,6 +33,7 @@ abstract class BaseNotifier<S extends Object?> with ChangeNotifier {
   S _state;
 
   /// Returns the current state.
+  @protected
   S get state => _state;
 
   /// Updates the state to [newState].
@@ -45,8 +49,13 @@ abstract class BaseNotifier<S extends Object?> with ChangeNotifier {
 
   @override
   @protected
-  @Deprecated('Use setState instead')
-  void notifyListeners() {}
+  @Deprecated('This will throw a unsupported error, Use setState instead')
+  Never notifyListeners() {
+    throw UnsupportedError(
+      'Direct calls to notifyListeners() are not allowed.'
+      'Use setState() to update state and notify listeners.',
+    );
+  }
 
   @override
   String toString() => '${describeIdentity(this)}($_state)';

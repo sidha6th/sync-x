@@ -7,8 +7,8 @@ import 'package:syncx/src/notifier/base/base_notifier.dart';
 ///
 /// [NotifierRegister] is a convenience widget for providing a notifier to its descendants.
 ///
-/// [N] is the type of [BaseNotifier] and [S] is the type of state managed by the notifier.
-class NotifierRegister<N extends BaseNotifier<S>, S extends Object?>
+/// [N] is the type of [BaseNotifier].
+class NotifierRegister<N extends BaseNotifier<Object?>>
     extends StatelessWidget {
   /// Creates a [NotifierRegister].
   ///

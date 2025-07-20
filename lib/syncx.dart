@@ -12,11 +12,14 @@
 /// See the package README and example for usage details.
 library syncX;
 
-export 'package:provider/provider.dart';
+export 'package:provider/provider.dart' show ReadContext;
 
-export 'src/builders/notifier_builder.dart';
-export 'src/builders/notifier_consumer.dart';
-export 'src/builders/notifier_listener.dart';
+export 'src/builders/sync/notifier_builder.dart';
+export 'src/builders/sync/notifier_consumer.dart';
+export 'src/builders/sync/notifier_listener.dart';
+export 'src/builders/async/async_notifier_builder.dart';
+export 'src/builders/async/async_notifier_consumer.dart';
+export 'src/builders/async/async_notifier_listener.dart';
 export 'src/notifier/base/base_notifier.dart' show AsyncNotifier, Notifier;
 export 'src/register/notifier_register.dart';
 export 'src/utils/models/async_state.dart';

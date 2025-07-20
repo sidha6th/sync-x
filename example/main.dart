@@ -33,9 +33,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NotifierRegister<CounterNotifier, int>(
+    return NotifierRegister(
       create: (_) => CounterNotifier(),
-      child: NotifierRegister<GreetingAsyncNotifier, AsyncState<String>>(
+      child: NotifierRegister(
         create: (_) => GreetingAsyncNotifier(),
         child: const MaterialApp(title: 'SyncX Example', home: HomeScreen()),
       ),
@@ -134,15 +134,15 @@ class AsyncNotifierTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: NotifierBuilder<GreetingAsyncNotifier, AsyncState<String>>(
-        builder: (context, state) => state.when(
-          loading: () => const CircularProgressIndicator(),
-          data: (greeting) =>
-              Text(greeting, style: Theme.of(context).textTheme.headlineMedium),
-          error: (e) => Text(
-            'Error: ${e.message ?? e.error}',
-            style: const TextStyle(color: Colors.red),
-          ),
+      child: AsyncNotifierBuilder<GreetingAsyncNotifier, String>(
+        dataBuilder: (state) => Text(
+          state,
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+        loadingBuilder: () => const CircularProgressIndicator(),
+        errorBuilder: (e) => Text(
+          'Error: ${e.message ?? e.error}',
+          style: const TextStyle(color: Colors.red),
         ),
       ),
     );

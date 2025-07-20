@@ -6,7 +6,7 @@ part of 'base/base_notifier.dart';
 /// It integrates with [AsyncNotifierLifecycle] for lifecycle management.
 ///
 /// [S] is the type of data managed by the notifier.
-abstract class AsyncNotifier<S> extends BaseNotifier<AsyncState<S>>
+abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
     with AsyncNotifierLifecycle<S> {
   /// Creates an [AsyncNotifier] with an optional initial [state].
   ///
@@ -16,6 +16,6 @@ abstract class AsyncNotifier<S> extends BaseNotifier<AsyncState<S>>
       : super(
           state == null ? const AsyncState.loading() : AsyncState.data(state),
         ) {
-    _initialize();
+    _initialize(setState);
   }
 }
