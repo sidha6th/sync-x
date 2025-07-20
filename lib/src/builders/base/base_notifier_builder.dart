@@ -12,9 +12,9 @@ abstract class BaseNotifierBuilder<N extends BaseNotifier<S>, S>
   /// Creates a [BaseNotifierBuilder].
   ///
   /// [notifier] is the instance of [BaseNotifier] to listen to. If null, it will be obtained from the nearest [Provider].
-  /// 
+  ///
   /// [child] is an optional static child widget.
-  /// 
+  ///
   /// [onInit] is an optional callback invoked with the notifier when the widget is initialized.
   ///
   /// Note: Do not manually call the notifier's `onInit()` method here. The notifier itself will automatically
