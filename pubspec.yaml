@@ -3,7 +3,7 @@ name: syncx
 description: >
   A lightweight, flexible state management solution for Flutter, providing notifiers, builders, and consumers for reactive UI updates with minimal boilerplate.
 
-version: 0.0.7
+version: 0.0.8
 
 homepage: https://github.com/sidha6th/sync-x
 repository: https://github.com/sidha6th/sync-x

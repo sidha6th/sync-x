@@ -14,6 +14,7 @@ A lightweight, flexible state management solution for Flutter, providing notifie
   - [Create a Notifier](#1-create-a-notifier)
   - [Register the Notifier](#2-register-the-notifier)
   - [Consume State with Builders & Listeners](#3-consume-state-with-builders--listeners)
+  - [Invoking Notifier Methods](#4-invoking-notifier-methods)
 - [Bad Practices / Don’ts](#bad-practices--donts)
 - [Usage Patterns](#usage-patterns)
 - [Future Plans](#future-plans)
@@ -207,6 +208,19 @@ NotifierBuilder<GreetingAsyncNotifier, AsyncState<String>>(
   ),
 )
 ```
+
+### 4. Invoking Notifier Methods
+
+To invoke a method inside your notifier (for example, to increment the counter), use the context extension or provider pattern in your widget. Here’s how you can call a notifier method from a button press:
+
+```dart
+ElevatedButton(
+  onPressed: () => context.read<CounterNotifier>().increment(),
+  child: const Text('Increment'),
+)
+```
+
+This will call the `increment` method on your `CounterNotifier` and update the state accordingly.
 
 ---
 

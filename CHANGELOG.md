@@ -1,3 +1,7 @@
+## 0.0.8 
+
+- Updated: Documentation.
+
 ## 0.0.7
 
 - Updated: Documentation patch.
