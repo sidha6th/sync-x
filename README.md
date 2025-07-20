@@ -11,8 +11,8 @@ A lightweight, flexible state management solution for Flutter, providing notifie
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Core Concepts & Usage](#core-concepts--usage)
-  - [Register the Notifier](#1-register-the-notifier)
-  - [Create a Notifier](#2-create-a-notifier)
+  - [Create a Notifier](#1-create-a-notifier)
+  - [Register the Notifier](#2-register-the-notifier)
   - [Consume State with Builders & Listeners](#3-consume-state-with-builders--listeners)
 - [Bad Practices / Don’ts](#bad-practices--donts)
 - [Usage Patterns](#usage-patterns)
@@ -51,30 +51,7 @@ flutter pub get
 
 ## Core Concepts & Usage
 
-### 1. Register the Notifier
-
-Register your notifier at the root of your widget tree:
-
-```dart
-NotifierRegister(
-  create: (context) => CounterNotifier(),
-  child: MyApp(),
-)
-```
-
-You can nest registers for multiple notifiers:
-
-```dart
-NotifierRegister(
-  create: (context) => CounterNotifier(),
-  child: NotifierRegister(
-    create: (context) => GreetingAsyncNotifier(),
-    child: MyApp(),
-  ),
-)
-```
-
-### 2. Create a Notifier
+### 1. Create a Notifier
 
 A Notifier holds and updates your state:
 
@@ -156,6 +133,29 @@ class GreetingAsyncNotifier extends AsyncNotifier<String> {
     );
   }
 }
+```
+
+### 2. Register the Notifier
+
+Register your notifier at the root of your widget tree:
+
+```dart
+NotifierRegister(
+  create: (context) => CounterNotifier(),
+  child: MyApp(),
+)
+```
+
+You can nest registers for multiple notifiers:
+
+```dart
+NotifierRegister(
+  create: (context) => CounterNotifier(),
+  child: NotifierRegister(
+    create: (context) => GreetingAsyncNotifier(),
+    child: MyApp(),
+  ),
+)
 ```
 
 ### 3. Consume State with Builders & Listeners

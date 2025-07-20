@@ -1,3 +1,7 @@
+## 0.0.7
+
+- Updated: Documentation patch.
+
 ## 0.0.6
 
 - Updated: Documentation for clarity and completeness, including improved usage examples and API explanations.
