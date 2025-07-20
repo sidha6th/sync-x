@@ -1,3 +1,11 @@
+## 0.0.83
+
+- Updated: Description.
+
+## 0.0.82
+
+- Improved documentation and made minor formatting adjustments.
+
 ## 0.0.81
 
 - Improved documentation and made minor formatting adjustments.
