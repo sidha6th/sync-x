@@ -9,7 +9,6 @@ Flutter state management made easy: SyncX is a lightweight, flexible state manag
 ## Table of Contents
 
 - [Features](#features)
-- [Getting Started](#getting-started)
 - [Core Concepts & Usage](#core-concepts--usage)
   - [Create a Notifier](#1-create-a-notifier)
   - [Register the Notifier](#2-register-the-notifier)
@@ -23,6 +22,16 @@ Flutter state management made easy: SyncX is a lightweight, flexible state manag
 
 ---
 
+## Why SyncX?
+
+- **Simple and familiar API** for Flutter state management.
+- **Reactive UI updates with rebuild control**: Widgets rebuild on state changes, with control over when they update.
+- **Notifier pattern**: Cleanly separates business logic from UI code.
+- **Effortless async state handling**: Easily manage loading, data, and error states.
+- **Minimal boilerplate**: Quick to set up and easy to integrate into any Flutter project.
+
+---
+
 ## Features
 
 - 🔄 **Notifier-based state management**: Simple, extendable notifiers for your app's state.
@@ -30,36 +39,6 @@ Flutter state management made easy: SyncX is a lightweight, flexible state manag
 - 👂 **Listener widgets**: React to state changes with side effects.
 - 🪶 **Minimal boilerplate**: Focus on your app logic, not on wiring up state.
 - ⚡ **Async state support**: Built-in support for loading, data, and error states in async flows.
-
----
-
-## Why use SyncX?
-
-- **Flutter state management** with a familiar and easy-to-use API.
-- Inspired by and compatible with popular libraries like **provider**, **bloc**, and **riverpod**.
-- **Reactive UI updates**: Automatically rebuild widgets when state changes.
-- **Notifier pattern**: Clean separation of business logic and UI.
-- **Async state handling**: Effortlessly manage loading, data, and error states.
-- **Minimal setup**: Get started quickly with little boilerplate.
-- **Composable**: Easily combine multiple notifiers and consumers.
-- **Great for migration**: If you’re coming from provider, bloc, or riverpod, you’ll feel right at home.
-
----
-
-## Getting Started
-
-Add SyncX to your `pubspec.yaml`:
-
-```yaml
-dependencies:
-  syncx: ^0.0.5
-```
-
-Then run:
-
-```sh
-flutter pub get
-```
 
 ---
 
