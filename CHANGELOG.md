@@ -1,3 +1,8 @@
+## 0.0.9
+
+- Added and expanded documentation for async widgets (`AsyncNotifierBuilder`, `AsyncNotifierConsumer`, `AsyncNotifierListener`) and core async state model(`AsyncState`).
+- Updated README: clarified async state handling, added examples for new async widgets, and explained their relationship to sync widgets.
+
 ## 0.0.83
 
 - Updated: Description.
