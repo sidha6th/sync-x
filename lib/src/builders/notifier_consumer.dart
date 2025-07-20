@@ -13,10 +13,27 @@ class NotifierConsumer<N extends BaseNotifier<S>, S>
   /// Creates a [NotifierConsumer].
   ///
   /// [builder] is called to build the widget tree based on the current state.
+  /// 
   /// [listener] is called for side effects when the state changes.
+  /// 
   /// [buildWhen] is an optional predicate that determines whether to rebuild when the state changes.
+  /// 
   /// [listenWhen] is an optional predicate that determines whether to call [listener] when the state changes.
+  /// 
   /// [onInit] is an optional callback invoked with the notifier when the widget is initialized.
+  ///
+  /// Note: Do not manually call the notifier's `onInit()` method here. The notifier itself will automatically
+  /// trigger its own `onInit()` when it is created, so calling it again would result in duplicate invocations.
+  ///
+  /// Example (incorrect usage):
+  /// ```dart
+  /// NotifierConsumer<Notifier, State>(
+  ///   // Do NOT do this:
+  ///   onInit: (notifier) => notifier.onInit(),
+  ///   builder: (context, state) => Text('State: $state'),
+  /// )
+  /// ```
+  ///
   /// [key] is the widget key.
   const NotifierConsumer({
     required Widget Function(BuildContext, S) super.builder,

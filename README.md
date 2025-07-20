@@ -6,6 +6,22 @@ A lightweight, flexible state management solution for Flutter, providing notifie
 
 ---
 
+## Table of Contents
+
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Core Concepts & Usage](#core-concepts--usage)
+  - [Register the Notifier](#1-register-the-notifier)
+  - [Create a Notifier](#2-create-a-notifier)
+  - [Consume State with Builders & Listeners](#3-consume-state-with-builders--listeners)
+- [Bad Practices / Don’ts](#bad-practices--donts)
+- [Usage Patterns](#usage-patterns)
+- [Future Plans](#future-plans)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
 ## Features
 
 - 🔄 **Notifier-based state management**: Simple, extendable notifiers for your app's state.
@@ -35,42 +51,13 @@ flutter pub get
 
 ## Core Concepts & Usage
 
-### 1. Create a Notifier
-
-A Notifier holds and updates your state:
-
-```dart
-class CounterNotifier extends Notifier<int> {
-  CounterNotifier() : super(0);
-  void increment() => setState(state + 1);
-}
-```
-
-For async state (loading/data/error):
-
-```dart
-class GreetingAsyncNotifier extends AsyncNotifier<String> {
-  GreetingAsyncNotifier() : super();
-
-  @override
-  Future<AsyncState<String>> onInit() async {
-    // Consider this as a Network call
-    await Future.delayed(const Duration(seconds: 2));
-    if (success...) {
-      return const AsyncState.data('Hello from AsyncNotifier!');
-    }
-    return const AsyncState.error(ErrorState('Failed to load greeting'));
-  }
-}
-```
-
-### 2. Register the Notifier
+### 1. Register the Notifier
 
 Register your notifier at the root of your widget tree:
 
 ```dart
-NotifierRegister<CounterNotifier, int>(
-  create: (_) => CounterNotifier(),
+NotifierRegister(
+  create: (context) => CounterNotifier(),
   child: MyApp(),
 )
 ```
@@ -78,13 +65,97 @@ NotifierRegister<CounterNotifier, int>(
 You can nest registers for multiple notifiers:
 
 ```dart
-NotifierRegister<CounterNotifier, int>(
-  create: (_) => CounterNotifier(),
-  child: NotifierRegister<GreetingAsyncNotifier, AsyncState<String>>(
-    create: (_) => GreetingAsyncNotifier(),
+NotifierRegister(
+  create: (context) => CounterNotifier(),
+  child: NotifierRegister(
+    create: (context) => GreetingAsyncNotifier(),
     child: MyApp(),
   ),
 )
+```
+
+### 2. Create a Notifier
+
+A Notifier holds and updates your state:
+
+```dart
+
+/// Extend [Notifier] for basic state management
+/// update state and notify listeners using [setState].
+class CounterNotifier extends Notifier<int> {
+  /// Creates a [CounterNotifier] with an initial state of 0.
+  CounterNotifier() : super(0);
+
+  /// Optionally override [onInit] to perform initialization logic when the notifier is first created.
+  ///
+  /// This method is called automatically once the instance is created.
+  /// Use it to initialize resources or start listeners if needed.
+  @override
+  void onInit(){
+    // doSomething...
+  }
+
+  /// Increments the counter by 1 and notifies listeners.
+  ///
+  /// Use [setState] to update the state and notify any listening widgets.
+  ///
+  /// [setState] also accepts two optional parameters:
+  ///   - [forced] (default: false): Forces the state update even if the value hasn't changed, useful for manipulating iterable state.
+  ///   - [notify] (default: true): Controls whether listeners are notified and the UI is rebuilt.
+  void increment() => setState(state + 1);
+}
+```
+
+For async state (loading/data/error):
+
+```dart
+/// Extend [AsyncNotifier] to handle async operations such as network calls 
+/// to handle loading, data, and error states using [AsyncState].
+class GreetingAsyncNotifier extends AsyncNotifier<String> {
+  /// Creates a [GreetingAsyncNotifier] with an initial state.
+  GreetingAsyncNotifier() : super();
+
+  /// Called when the notifier is first initialized.
+  ///
+  /// This method is called automatically once the instance is created.
+  ///
+  /// It simulates a network call by delaying for 2 seconds.
+  /// If the operation is successful, it returns an [AsyncState.data] with a greeting message.
+  /// Otherwise, it returns an [AsyncState.error] with an error message.
+  @override
+  Future<AsyncState<String>> onInit() async {
+    // Consider this as a Network call
+    await Future.delayed(const Duration(seconds: 2));
+    final bool isSuccess = true; // Set to false to simulate error
+    if (isSuccess) {
+      return const AsyncState.data('Hello from AsyncNotifier!');
+    }
+    return const AsyncState.error(ErrorState('Failed to load greeting'));
+  }
+
+  /// Updates the state by simulating an asynchronous operation.
+  ///
+  /// This method demonstrates how to manually set the state to loading,
+  /// perform an async task, and then update the state to either data or error.
+  ///
+  /// - Sets the state to loading before starting the async operation.
+  /// - If successful, sets the state to data with a success message.
+  /// - If failed, sets the state to error with an error object and message.
+  Future<void> updateState() async {
+    setState(state.toLoading());
+    // Consider this as a Network call
+    await Future.delayed(const Duration(seconds: 2));
+    final bool isSuccess = true; // Set to false to simulate error
+    if (isSuccess) {
+      return setState(state.toData('Success'));
+    }
+
+    // Replace 'errorObject' with your actual error object as needed
+    return setState(
+      state.toError('..errorObject', message: 'Network call failed'),
+    );
+  }
+}
 ```
 
 ### 3. Consume State with Builders & Listeners
@@ -137,6 +208,22 @@ NotifierBuilder<GreetingAsyncNotifier, AsyncState<String>>(
 )
 ```
 
+---
+
+### Bad Practices / Don’ts
+
+- **Don’t:** Do not call the notifier’s `onInit` manually from builder, consumer, or listener `onInit` callbacks. This will result in duplicate initialization and unexpected behavior. The `onInit` method inside your notifier will be called automatically once the notifier instance is created. You do not need to call it yourself.
+
+  **Incorrect usage example:**
+  ```dart
+  NotifierBuilder<Notifier, State>(
+    // Do NOT do this:
+    onInit: (notifier) => notifier.onInit(),
+    // Do this if you need to call your own custom initialization logic when the widget is created:
+    onInit: (notifier) => notifier.doSomethingElse(),
+    builder: (context, state) => Text('State: $state'),
+  )
+  ```
 ---
 
 ## Usage Patterns

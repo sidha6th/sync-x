@@ -12,8 +12,23 @@ abstract class BaseNotifierBuilder<N extends BaseNotifier<S>, S>
   /// Creates a [BaseNotifierBuilder].
   ///
   /// [notifier] is the instance of [BaseNotifier] to listen to. If null, it will be obtained from the nearest [Provider].
+  /// 
   /// [child] is an optional static child widget.
+  /// 
   /// [onInit] is an optional callback invoked with the notifier when the widget is initialized.
+  ///
+  /// Note: Do not manually call the notifier's `onInit()` method here. The notifier itself will automatically
+  /// trigger its own `onInit()` when it is created, so calling it again would result in duplicate invocations.
+  ///
+  /// Example (incorrect usage):
+  /// ```dart
+  /// NotifierBuilder<Notifier, State>(
+  ///   // Do NOT do this:
+  ///   onInit: (notifier) => notifier.onInit(),
+  ///   builder: (context, state) => Text('State: $state'),
+  /// )
+  /// ```
+  ///
   /// [builder] is a function that builds the widget tree based on the current state.
   const BaseNotifierBuilder({
     this.notifier,
@@ -30,6 +45,9 @@ abstract class BaseNotifierBuilder<N extends BaseNotifier<S>, S>
   final Widget? child;
 
   /// An optional callback invoked with the notifier when the widget is initialized.
+  ///
+  /// Note: Do not manually call the notifier's `onInit()` method here. The notifier itself will automatically
+  /// trigger its own `onInit()` when it is created, so calling it again would result in duplicate invocations.
   final void Function(N notifier)? onInit;
 
   /// A function that builds the widget tree based on the current state.
