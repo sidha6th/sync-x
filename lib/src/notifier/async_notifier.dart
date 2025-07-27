@@ -55,6 +55,7 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   ///   // Perform async operation...
   /// }
   /// ```
+  @protected
   void setLoading() => setState(state.toLoading());
 
   /// Transitions the notifier to the data state with the given [data].
@@ -69,6 +70,7 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   ///   setData(data);
   /// }
   /// ```
+  @protected
   void setData(S data) => setState(AsyncState.data(data));
 
   /// Transitions the notifier to the error state with the given error information.
@@ -85,6 +87,7 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   ///   setError(error, message: 'Failed to fetch data');
   /// }
   /// ```
+  @protected
   void setError(
     Object error, {
     String? message,
