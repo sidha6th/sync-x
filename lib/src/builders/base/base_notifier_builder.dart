@@ -86,10 +86,10 @@ class _BaseNotifierBuilderState<N extends BaseNotifier<S>, S>
   void didUpdateWidget(covariant BaseNotifierBuilder<N, S> oldWidget) {
     super.didUpdateWidget(oldWidget);
     // If the notifier instance changes, update the listener.
-    final newNotifier = widget.notifier!();
+    final newNotifier = widget.notifier?.call();
     if (widget.notifier == null || newNotifier == notifier) return;
     _removeListener();
-    notifier = newNotifier;
+    notifier = newNotifier!;
     _addListener();
   }
 
