@@ -32,11 +32,11 @@ environment:
 dependencies:
   flutter: { sdk: flutter }
   provider: ^6.1.5
+  meta: ^1.16.0
 
 dev_dependencies:
   flutter_test: { sdk: flutter }
   flutter_lints: ^5.0.0
-
 # Exclude files from the published package
 # (add more patterns as needed)
 #

@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart'
         VoidCallback,
         Widget,
         WidgetsBinding;
+import 'package:meta/meta.dart' show internal;
 import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 import 'package:syncx/src/utils/extensions/build_context_extensions.dart';
 
@@ -18,6 +19,7 @@ import 'package:syncx/src/utils/extensions/build_context_extensions.dart';
 /// It manages the lifecycle of the notifier, listens for state changes, and provides hooks for rebuilding and initialization.
 ///
 /// [N] is the type of [BaseNotifier] and [S] is the type of state managed by the notifier.
+@internal
 abstract class BaseNotifierBuilder<N extends BaseNotifier<S>, S extends Object?>
     extends StatefulWidget {
   /// Creates a [BaseNotifierBuilder].
