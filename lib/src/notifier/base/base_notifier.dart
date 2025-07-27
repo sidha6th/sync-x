@@ -20,7 +20,7 @@ part '../notifier.dart';
 ///
 /// [BaseNotifier] extends [ChangeNotifier] and provides a foundation for state management
 /// with automatic listener notification. It enforces the use of [setState] for state updates
-/// and prevents direct calls to [notifyListeners].
+/// and prevents direct calls to notifyListeners.
 ///
 /// [S] is the type of state managed by the notifier.
 ///
@@ -43,7 +43,7 @@ abstract class BaseNotifier<S extends Object?> extends _RootBaseNotifier<S> {
   /// Overrides [notifyListeners] to prevent direct calls.
   ///
   /// This method is deprecated and will throw an [UnsupportedError] if called directly.
-  /// 
+  ///
   /// Use [setState] instead to update state and notify listeners automatically.
   ///
   /// This ensures that state updates always go through the proper [setState] method,
