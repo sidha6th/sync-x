@@ -3,7 +3,7 @@ name: syncx
 description: >
   SyncX is a lightweight, flexible Flutter state management library with notifiers and reactive UI updates, inspired by provider, bloc, and riverpod.
 
-version: 0.0.83
+version: 0.0.95
 
 homepage: https://github.com/sidha6th/sync-x
 repository: https://github.com/sidha6th/sync-x
@@ -32,6 +32,7 @@ environment:
 dependencies:
   flutter: { sdk: flutter }
   provider: ^6.1.5
+  meta: ^1.16.0
 
 dev_dependencies:
   flutter_test: { sdk: flutter }
