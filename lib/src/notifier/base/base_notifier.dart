@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart'
         protected,
         mustCallSuper,
         describeIdentity;
-import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:meta/meta.dart' show internal;
 import 'package:syncx/src/utils/models/async_state.dart';
 import 'package:syncx/src/utils/models/base/base_async_state.dart';

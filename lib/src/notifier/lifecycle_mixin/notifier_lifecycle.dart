@@ -1,9 +1,7 @@
 part of '../base/base_notifier.dart';
 
 mixin NotifierLifecycle {
-  void _initialize() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => onInit());
-  }
+  void _initialize() => onInit();
 
   /// Called when the notifier is initialized and attached to the widget tree.
   ///
