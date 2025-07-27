@@ -1,7 +1,14 @@
 // ignore_for_file: invalid_use_of_protected_member
 
 import 'package:flutter/widgets.dart'
-    show StatefulWidget, Widget, BuildContext, VoidCallback, State, SizedBox;
+    show
+        BuildContext,
+        SizedBox,
+        State,
+        StatefulWidget,
+        VoidCallback,
+        Widget,
+        WidgetsBinding;
 import 'package:meta/meta.dart' show internal;
 import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 import 'package:syncx/src/utils/extensions/build_context_extensions.dart';
@@ -79,7 +86,7 @@ class _BaseNotifierBuilderState<N extends BaseNotifier<S>, S>
   void initState() {
     super.initState();
     _addListener();
-    widget.onInit?.call(notifier);
+    _onInit();
   }
 
   @override
@@ -111,6 +118,13 @@ class _BaseNotifierBuilderState<N extends BaseNotifier<S>, S>
   void setState(VoidCallback fn) {
     if (!mounted) return;
     super.setState(fn);
+  }
+
+  void _onInit() {
+    if (widget.onInit == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onInit!.call(notifier);
+    });
   }
 
   /// Internal callback when the notifier's state changes.
