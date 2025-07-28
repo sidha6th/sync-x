@@ -14,6 +14,15 @@ import 'package:syncx/src/utils/models/error_state.dart';
 class AsyncNotifierListener<N extends BaseNotifier<BaseAsyncState<S>>,
     S extends Object?> extends NotifierListener<N, BaseAsyncState<S>> {
   /// Creates an [AsyncNotifierListener].
+  const AsyncNotifierListener({
+    required super.child,
+    required super.listener,
+    super.listenWhen,
+    super.notifier,
+    super.onInit,
+    super.key,
+  });
+
   ///
   /// [dataListener], [loadingListener], and [errorListener] are optional callbacks invoked for side effects
   /// when the state is [AsyncState.data], [AsyncState.loading], or [AsyncState.error], respectively.
@@ -39,11 +48,17 @@ class AsyncNotifierListener<N extends BaseNotifier<BaseAsyncState<S>>,
   ///
   /// [child] is the widget below this widget in the tree.
   /// [key] is the widget key.
-  AsyncNotifierListener({
+  AsyncNotifierListener.withData({
     required super.child,
-    this.dataListener,
-    this.errorListener,
-    this.loadingListener,
+
+    /// Optional callback for side effects when the state is [AsyncState.data].
+    final void Function(S data)? dataListener,
+
+    /// Optional callback for side effects when the state is [AsyncState.loading].
+    final VoidCallback? loadingListener,
+
+    /// Optional callback for side effects when the state is [AsyncState.error].
+    final void Function(ErrorState error)? errorListener,
     bool Function(S? previous, S? current)? listenWhen,
     super.notifier,
     super.onInit,
@@ -57,13 +72,4 @@ class AsyncNotifierListener<N extends BaseNotifier<BaseAsyncState<S>>,
           listenWhen: (previous, current) =>
               listenWhen?.call(previous.data, current.data) ?? true,
         );
-
-  /// Optional callback for side effects when the state is [AsyncState.data].
-  final void Function(S data)? dataListener;
-
-  /// Optional callback for side effects when the state is [AsyncState.loading].
-  final VoidCallback? loadingListener;
-
-  /// Optional callback for side effects when the state is [AsyncState.error].
-  final void Function(ErrorState error)? errorListener;
 }

@@ -150,7 +150,7 @@ class AsyncNotifierTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: AsyncNotifierBuilder<GreetingAsyncNotifier, String>(
+        child: AsyncNotifierBuilder<GreetingAsyncNotifier, String>.withData(
           dataBuilder: (state) =>
               Text(state, style: Theme.of(context).textTheme.headlineMedium),
           loadingBuilder: () => const CircularProgressIndicator(),

@@ -14,6 +14,16 @@ import 'package:syncx/src/utils/models/error_state.dart';
 class AsyncNotifierConsumer<N extends BaseNotifier<BaseAsyncState<S>>,
     S extends Object?> extends NotifierConsumer<N, BaseAsyncState<S>> {
   /// Creates an [AsyncNotifierConsumer].
+  const AsyncNotifierConsumer({
+    required super.builder,
+    required super.listener,
+    super.buildWhen,
+    super.listenWhen,
+    super.notifier,
+    super.onInit,
+    super.key,
+  });
+
   ///
   /// [dataBuilder] is called to build the widget tree when the state is [AsyncState.data].
   /// [loadingBuilder] is called when the state is [AsyncState.loading].
@@ -42,13 +52,24 @@ class AsyncNotifierConsumer<N extends BaseNotifier<BaseAsyncState<S>>,
   /// ```
   ///
   /// [key] is the widget key.
-  AsyncNotifierConsumer({
-    required this.dataBuilder,
-    required this.errorBuilder,
-    required this.loadingBuilder,
-    this.dataListener,
-    this.errorListener,
-    this.loadingListener,
+  AsyncNotifierConsumer.withData({
+    /// Called when the state is [AsyncState.loading].
+    required final Widget Function() loadingBuilder,
+
+    /// Called when the state is [AsyncState.data].
+    required final Widget Function(S state) dataBuilder,
+
+    /// Called when the state is [AsyncState.error].
+    required final Widget Function(ErrorState error) errorBuilder,
+
+    /// Optional callback for side effects when the state is [AsyncState.data].
+    final void Function(S data)? dataListener,
+
+    /// Optional callback for side effects when the state is [AsyncState.loading].
+    final VoidCallback? loadingListener,
+
+    /// Optional callback for side effects when the state is [AsyncState.error].
+    final void Function(ErrorState error)? errorListener,
     bool Function(S? previous, S? current)? buildWhen,
     bool Function(S? previous, S? current)? listenWhen,
     super.notifier,
@@ -70,22 +91,4 @@ class AsyncNotifierConsumer<N extends BaseNotifier<BaseAsyncState<S>>,
           listenWhen: (previous, current) =>
               listenWhen?.call(previous.data, current.data) ?? true,
         );
-
-  /// Called when the state is [AsyncState.loading].
-  final Widget Function() loadingBuilder;
-
-  /// Called when the state is [AsyncState.data].
-  final Widget Function(S state) dataBuilder;
-
-  /// Called when the state is [AsyncState.error].
-  final Widget Function(ErrorState error) errorBuilder;
-
-  /// Optional callback for side effects when the state is [AsyncState.data].
-  final void Function(S data)? dataListener;
-
-  /// Optional callback for side effects when the state is [AsyncState.loading].
-  final VoidCallback? loadingListener;
-
-  /// Optional callback for side effects when the state is [AsyncState.error].
-  final void Function(ErrorState error)? errorListener;
 }
