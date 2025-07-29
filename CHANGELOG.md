@@ -1,4 +1,4 @@
-## 0.0.95
+## 0.0.96
 
 - Fix: Resolved minor bugs
 - Features: New Async notifier API's setLoading, setError and setData.
