@@ -196,10 +196,22 @@ SyncX provides specialized widgets for handling asynchronous state:
 - `AsyncNotifierConsumer` – combines building and listening for side effects in async flows.
 - `AsyncNotifierListener` – listens for async state changes and triggers side effects without rebuilding the UI.
 
-Example using `AsyncNotifierBuilder`:
-
+**Direct usage with builder:**
 ```dart
 AsyncNotifierBuilder<GreetingAsyncNotifier, String>(
+  builder: (context, state) {
+    return state.when(
+      loading: () => const CircularProgressIndicator(),
+      data: (greeting) => Text(greeting),
+      error: (error) => Text('Error: \\${error.message}'),
+    );
+  },
+)
+```
+
+**Convenient usage with .withData:**
+```dart
+AsyncNotifierBuilder<GreetingAsyncNotifier, String>.withData(
   loadingBuilder: () => CircularProgressIndicator(),
   dataBuilder: (greeting) => Text(greeting),
   errorBuilder: (error) => Text('Error: \\${error.message}'),

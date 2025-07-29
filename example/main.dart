@@ -150,14 +150,20 @@ class AsyncNotifierTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: AsyncNotifierBuilder<GreetingAsyncNotifier, String>.withData(
-          dataBuilder: (state) =>
-              Text(state, style: Theme.of(context).textTheme.headlineMedium),
-          loadingBuilder: () => const CircularProgressIndicator(),
-          errorBuilder: (e) => Text(
-            'Error: ${e.message ?? e.error}',
-            style: const TextStyle(color: Colors.red),
-          ),
+        child: AsyncNotifierBuilder<GreetingAsyncNotifier, String>(
+          builder: (context, state) {
+            return state.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              data: (data) => Text(
+                data,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              error: (error) => Text(
+                'Error: ${error.message ?? error.error}',
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
