@@ -14,6 +14,14 @@ import 'package:syncx/src/utils/models/error_state.dart';
 class AsyncNotifierBuilder<N extends BaseNotifier<BaseAsyncState<S>>,
     S extends Object?> extends NotifierBuilder<N, BaseAsyncState<S>> {
   /// Creates an [AsyncNotifierBuilder].
+  const AsyncNotifierBuilder({
+    required super.builder,
+    super.buildWhen,
+    super.notifier,
+    super.onInit,
+    super.key,
+  });
+
   ///
   /// [dataBuilder] is called to build the widget tree when the state is [AsyncState.data].
   /// [loadingBuilder] is called when the state is [AsyncState.loading].
@@ -38,10 +46,15 @@ class AsyncNotifierBuilder<N extends BaseNotifier<BaseAsyncState<S>>,
   /// ```
   ///
   /// [key] is the widget key.
-  AsyncNotifierBuilder({
-    required this.dataBuilder,
-    required this.errorBuilder,
-    required this.loadingBuilder,
+  AsyncNotifierBuilder.withData({
+    /// Called when the state is [AsyncState.loading].
+    required final Widget Function() loadingBuilder,
+
+    /// Called when the state is [AsyncState.data].
+    required final Widget Function(S state) dataBuilder,
+
+    /// Called when the state is [AsyncState.error].
+    required final Widget Function(ErrorState error) errorBuilder,
     final bool Function(S? previous, S? current)? buildWhen,
     super.notifier,
     super.onInit,
@@ -55,13 +68,4 @@ class AsyncNotifierBuilder<N extends BaseNotifier<BaseAsyncState<S>>,
           buildWhen: (previous, current) =>
               buildWhen?.call(previous.data, current.data) ?? true,
         );
-
-  /// Called when the state is [AsyncState.loading].
-  final Widget Function() loadingBuilder;
-
-  /// Called when the state is [AsyncState.data].
-  final Widget Function(S state) dataBuilder;
-
-  /// Called when the state is [AsyncState.error].
-  final Widget Function(ErrorState error) errorBuilder;
 }

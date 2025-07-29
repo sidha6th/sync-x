@@ -129,7 +129,7 @@ class _BaseNotifierBuilderState<N extends BaseNotifier<S>, S>
 
   /// Internal callback when the notifier's state changes.
   void _whenStateChanged() {
-    widget.whenStateChanged(_previous, notifier.state, _reBuild);
+    if (mounted) widget.whenStateChanged(_previous, notifier.state, _reBuild);
     _previous = notifier.state;
   }
 
