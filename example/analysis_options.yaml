@@ -1,0 +1,21 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    avoid_print: false
+    prefer_single_quotes: true
+    require_trailing_commas: true
+    always_declare_return_types: true
+    sort_constructors_first: true
+    always_put_required_named_parameters_first: true
+    avoid_redundant_argument_values: true
+    avoid_void_async: true
+    void_checks: true
+    always_use_package_imports: true
+    avoid_relative_lib_imports: true
+    use_decorated_box: true
+    prefer_const_constructors: true
+    unnecessary_await_in_return: true
+    avoid_slow_async_io: true
+    unnecessary_lambdas: true
+    unawaited_futures: true

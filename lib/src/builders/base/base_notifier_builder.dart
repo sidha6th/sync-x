@@ -59,7 +59,7 @@ abstract class BaseNotifierBuilder<N extends BaseNotifier<S>, S extends Object?>
   final void Function(N notifier)? onInit;
 
   /// A function that builds the widget tree based on the current state.
-  final Widget Function(BuildContext context, S state)? builder;
+  final Widget Function(S state)? builder;
 
   /// Called when the notifier's state changes.
   ///
@@ -103,7 +103,7 @@ class _BaseNotifierBuilderState<N extends BaseNotifier<S>, S>
   @override
   Widget build(BuildContext context) {
     // Build using the builder function if provided, otherwise use the child or an empty box.
-    return widget.builder?.call(context, _previous) ??
+    return widget.builder?.call(_previous) ??
         widget.child ??
         const SizedBox.shrink();
   }

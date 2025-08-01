@@ -96,7 +96,7 @@ class CounterNotifierTab extends StatelessWidget {
             // Rebuilds only when the count changes
             NotifierBuilder<CounterNotifier, int>(
               buildWhen: (prev, curr) => prev != curr,
-              builder: (context, count) => Text(
+              builder: (count) => Text(
                 'Count: $count',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
@@ -117,7 +117,7 @@ class CounterNotifierTab extends StatelessWidget {
             NotifierConsumer<CounterNotifier, int>(
               buildWhen: (prev, curr) => prev != curr,
               listenWhen: (prev, curr) => curr > prev,
-              builder: (context, count) => Row(
+              builder: (count) => Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
@@ -151,13 +151,11 @@ class AsyncNotifierTab extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: AsyncNotifierBuilder<GreetingAsyncNotifier, String>(
-          builder: (context, state) {
+          builder: (state) {
             return state.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              data: (data) => Text(
-                data,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
+              data: (data) =>
+                  Text(data, style: Theme.of(context).textTheme.headlineMedium),
               error: (error) => Text(
                 'Error: ${error.message ?? error.error}',
                 style: const TextStyle(color: Colors.red),

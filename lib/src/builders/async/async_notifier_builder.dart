@@ -60,7 +60,7 @@ class AsyncNotifierBuilder<N extends BaseNotifier<BaseAsyncState<S>>,
     super.onInit,
     super.key,
   }) : super(
-          builder: (context, state) => state.when(
+          builder: (state) => state.when(
             data: dataBuilder,
             error: errorBuilder,
             loading: loadingBuilder,

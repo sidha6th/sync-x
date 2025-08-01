@@ -81,7 +81,7 @@ class AsyncNotifierConsumer<N extends BaseNotifier<BaseAsyncState<S>>,
             loading: () => loadingListener?.call(),
             data: (data) => dataListener?.call(data),
           ),
-          builder: (context, state) => state.when(
+          builder: (state) => state.when(
             data: dataBuilder,
             error: errorBuilder,
             loading: loadingBuilder,

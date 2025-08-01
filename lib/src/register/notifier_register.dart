@@ -40,6 +40,7 @@ class NotifierRegister<N extends BaseNotifier<Object?>>
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
+      key: key,
       lazy: lazy,
       create: create,
       builder: builder,

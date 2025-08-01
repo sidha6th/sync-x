@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart' show Widget, BuildContext, VoidCallback;
+import 'package:flutter/widgets.dart' show Widget, VoidCallback;
 import 'package:syncx/src/builders/base/base_notifier_builder.dart';
 import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 
@@ -36,7 +36,7 @@ class NotifierConsumer<N extends BaseNotifier<S>, S extends Object?>
   ///
   /// [key] is the widget key.
   const NotifierConsumer({
-    required Widget Function(BuildContext context, S state) super.builder,
+    required Widget Function(S state) super.builder,
     required this.listener,
     this.listenWhen,
     this.buildWhen,

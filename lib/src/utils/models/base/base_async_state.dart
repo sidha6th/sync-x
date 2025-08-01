@@ -8,7 +8,7 @@ import 'package:syncx/src/utils/models/error_state.dart';
 /// [S] is the type of data managed by the state.
 ///
 /// This class is typically extended or implemented by concrete async state classes.
-/// It enables pattern matching via [when], and provides utility constructors and methods
+/// It enables pattern matching via [when] and [whenData], and provides utility constructors and methods
 /// for transitioning between loading, data, and error states.
 abstract class BaseAsyncState<S extends Object?> {
   /// Creates a [BaseAsyncState] with optional [data] and [errorState].
@@ -79,9 +79,33 @@ abstract class BaseAsyncState<S extends Object?> {
   /// [error] is called if the state contains an error.
   ///
   /// Returns the result of the matching callback.
+  /// All callbacks are required and must be provided.
   T when<T>({
     required T Function() loading,
     required T Function(S data) data,
     required T Function(ErrorState e) error,
+  });
+
+  /// Optional pattern matching for async state, focused on data extraction.
+  ///
+  /// [data] is called if the state contains data and is required.
+  /// [loading] is an optional callback for loading state.
+  /// [error] is an optional callback for error state.
+  ///
+  /// This method is useful when you primarily care about the data and want optional
+  /// handling for loading and error states. All callbacks are void functions.
+  ///
+  /// Example:
+  /// ```dart
+  /// state.whenData(
+  ///   data: (data) => print('Data: $data'),
+  ///   loading: () => print('Loading...'),
+  ///   error: (error) => print('Error: ${error.message}'),
+  /// );
+  /// ```
+  void whenData<T>(
+    void Function(S data) data, {
+    void Function()? loading,
+    void Function(ErrorState e)? error,
   });
 }
