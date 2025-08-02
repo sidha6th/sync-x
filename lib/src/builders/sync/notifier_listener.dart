@@ -1,6 +1,4 @@
-import 'package:flutter/widgets.dart' show Widget;
-import 'package:syncx/src/builders/base/base_notifier_builder.dart';
-import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
+part of '../base/base_notifier_builder.dart';
 
 /// A widget that listens to state changes from a [BaseNotifier] and triggers side effects.
 ///
@@ -9,7 +7,7 @@ import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 ///
 /// [N] is the type of [BaseNotifier] and [S] is the type of state managed by the notifier.
 class NotifierListener<N extends BaseNotifier<S>, S extends Object?>
-    extends BaseNotifierBuilder<N, S> {
+    extends _BaseNotifierBuilder<N, S> {
   /// Creates a [NotifierListener].
   ///
   /// [child] is the static child widget.

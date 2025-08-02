@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart' show VoidCallback;
-import 'package:syncx/src/builders/sync/notifier_listener.dart';
+import 'package:syncx/src/builders/base/base_notifier_builder.dart'
+    show NotifierListener;
 import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 import 'package:syncx/src/utils/models/async_state.dart';
 import 'package:syncx/src/utils/models/base/base_async_state.dart';

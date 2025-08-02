@@ -24,23 +24,30 @@ part of 'base/base_notifier.dart';
 /// ```
 abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
     with AsyncNotifierLifecycle<S> {
-  /// Creates an [AsyncNotifier] with an optional initial [state].
+  /// Creates an [AsyncNotifier] with initial data.
   ///
-  /// [state] is the initial data to set. If null, the notifier starts in the loading state.
-  /// Otherwise, it starts with the provided data state.
+  /// [state] is the initial data to set. The notifier starts with the provided data state.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Start with data state
+  /// AsyncNotifier<String>.withData('Initial data')
+  /// ```
+  AsyncNotifier.withData(S data) : super(AsyncState.data(data)) {
+    _initialize(setState);
+  }
+
+  /// Creates an [AsyncNotifier] that starts in the loading state.
+  ///
+  /// Use this constructor when you want the notifier to start in a loading state
+  /// and then transition to data or error state based on async operations.
   ///
   /// Example:
   /// ```dart
   /// // Start with loading state
   /// AsyncNotifier<String>()
-  ///
-  /// // Start with data state
-  /// AsyncNotifier<String>('Initial data')
   /// ```
-  AsyncNotifier([S? state])
-      : super(
-          state == null ? const AsyncState.loading() : AsyncState.data(state),
-        ) {
+  AsyncNotifier() : super(const AsyncState.loading()) {
     _initialize(setState);
   }
 
@@ -71,7 +78,7 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   /// }
   /// ```
   @protected
-  void setData(S data) => setState(AsyncState.data(data));
+  void setData(S data) => setState(state.toData(data));
 
   /// Transitions the notifier to the error state with the given error information.
   ///
@@ -93,7 +100,7 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
     String? message,
     StackTrace? stackTrace,
   }) {
-    setState(
+    return setState(
       state.toError(
         error,
         message: message,

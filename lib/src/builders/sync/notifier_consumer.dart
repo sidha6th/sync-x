@@ -1,6 +1,4 @@
-import 'package:flutter/widgets.dart' show Widget, BuildContext, VoidCallback;
-import 'package:syncx/src/builders/base/base_notifier_builder.dart';
-import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
+part of '../base/base_notifier_builder.dart';
 
 /// A widget that both rebuilds and listens to state changes from a [BaseNotifier].
 ///
@@ -9,7 +7,7 @@ import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 ///
 /// [N] is the type of [BaseNotifier] and [S] is the type of state managed by the notifier.
 class NotifierConsumer<N extends BaseNotifier<S>, S extends Object?>
-    extends BaseNotifierBuilder<N, S> {
+    extends _BaseNotifierBuilder<N, S> {
   /// Creates a [NotifierConsumer].
   ///
   /// [builder] is called to build the widget tree based on the current state.
@@ -36,7 +34,7 @@ class NotifierConsumer<N extends BaseNotifier<S>, S extends Object?>
   ///
   /// [key] is the widget key.
   const NotifierConsumer({
-    required Widget Function(BuildContext context, S state) super.builder,
+    required Widget Function(S state) super.builder,
     required this.listener,
     this.listenWhen,
     this.buildWhen,
