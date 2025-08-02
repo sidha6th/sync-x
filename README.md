@@ -100,7 +100,7 @@ class GreetingAsyncNotifier extends AsyncNotifier<String> {
     if (isSuccess) {
       return const AsyncState.data('Hello from AsyncNotifier!');
     }
-    return const AsyncState.error(ErrorState('Failed to load greeting'));
+    return const AsyncState.error('Failed to load greeting');
   }
 
   /// Updates the state by simulating an asynchronous operation.

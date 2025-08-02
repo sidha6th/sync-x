@@ -9,9 +9,12 @@ import 'package:flutter/widgets.dart'
         VoidCallback,
         Widget,
         WidgetsBinding;
-import 'package:meta/meta.dart' show internal;
 import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 import 'package:syncx/src/utils/extensions/build_context_extensions.dart';
+
+part '../sync/notifier_builder.dart';
+part '../sync/notifier_consumer.dart';
+part '../sync/notifier_listener.dart';
 
 /// A base widget for listening to a [BaseNotifier] and rebuilding when its state changes.
 ///
@@ -19,9 +22,8 @@ import 'package:syncx/src/utils/extensions/build_context_extensions.dart';
 /// It manages the lifecycle of the notifier, listens for state changes, and provides hooks for rebuilding and initialization.
 ///
 /// [N] is the type of [BaseNotifier] and [S] is the type of state managed by the notifier.
-@internal
-abstract class BaseNotifierBuilder<N extends BaseNotifier<S>, S extends Object?>
-    extends StatefulWidget {
+abstract class _BaseNotifierBuilder<N extends BaseNotifier<S>,
+    S extends Object?> extends StatefulWidget {
   /// Creates a [BaseNotifierBuilder].
   ///
   /// [notifier] provides the [BaseNotifier] instance to listen to. If null, the nearest [Provider] is used.
@@ -30,7 +32,7 @@ abstract class BaseNotifierBuilder<N extends BaseNotifier<S>, S extends Object?>
   /// [child] is an optional static child widget.
   /// [key] is the widget key.
   ///
-  const BaseNotifierBuilder({
+  const _BaseNotifierBuilder({
     this.notifier,
     this.builder,
     this.onInit,
@@ -75,7 +77,7 @@ abstract class BaseNotifierBuilder<N extends BaseNotifier<S>, S extends Object?>
 ///
 /// Handles listening to the notifier, managing state, and triggering rebuilds when needed.
 class _BaseNotifierBuilderState<N extends BaseNotifier<S>, S>
-    extends State<BaseNotifierBuilder<N, S>> {
+    extends State<_BaseNotifierBuilder<N, S>> {
   /// The notifier instance being listened to. Initialized from the widget or the nearest Provider.
   late N notifier = widget.notifier?.call() ?? context.get<N>();
 
@@ -90,7 +92,7 @@ class _BaseNotifierBuilderState<N extends BaseNotifier<S>, S>
   }
 
   @override
-  void didUpdateWidget(covariant BaseNotifierBuilder<N, S> oldWidget) {
+  void didUpdateWidget(covariant _BaseNotifierBuilder<N, S> oldWidget) {
     super.didUpdateWidget(oldWidget);
     // If the notifier instance changes, update the listener.
     final newNotifier = widget.notifier?.call();

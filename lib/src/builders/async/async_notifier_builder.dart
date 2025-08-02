@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' show Widget;
-import 'package:syncx/src/builders/sync/notifier_builder.dart';
+import 'package:syncx/src/builders/base/base_notifier_builder.dart'
+    show NotifierBuilder;
 import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 import 'package:syncx/src/utils/models/async_state.dart';
 import 'package:syncx/src/utils/models/base/base_async_state.dart';

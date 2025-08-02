@@ -1,5 +1,5 @@
-import 'package:example/src/home/widgets/async_notifier_tab.dart';
-import 'package:example/src/home/widgets/counter_notifier_tab.dart';
+import 'package:example/src/home/tabs/async_notifier_tab.dart';
+import 'package:example/src/home/tabs/counter_notifier_tab.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {

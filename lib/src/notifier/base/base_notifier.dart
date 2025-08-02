@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:ui' show VoidCallback;
 
 import 'package:flutter/foundation.dart'
     show
@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart'
         protected,
         mustCallSuper,
         describeIdentity;
-import 'package:meta/meta.dart' show internal;
 import 'package:syncx/src/utils/models/async_state.dart';
 import 'package:syncx/src/utils/models/base/base_async_state.dart';
 
@@ -35,7 +34,6 @@ part '../notifier.dart';
 ///   void increment() => setState(state + 1);
 /// }
 /// ```
-@internal
 abstract class BaseNotifier<S extends Object?> extends _RootBaseNotifier<S> {
   /// Creates a [BaseNotifier] with the given initial [state].
   BaseNotifier(super.state);
@@ -136,7 +134,7 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   @protected
   @mustCallSuper
   void setState(S newState, {bool forced = false, bool notify = true}) {
-    if (_state != newState || forced) _state = newState;
+    if (!identical(state, newState) || forced) _state = newState;
     if (notify) super.notifyListeners();
   }
 }

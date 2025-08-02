@@ -11,7 +11,6 @@ class CounterNotifierTab extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Rebuilds only when the count changes
           NotifierConsumer<CounterNotifier, int>(
             listenWhen: (_, count) => count != 0 && count % 2 == 0,
             listener: (count) {
