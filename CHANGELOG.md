@@ -1,7 +1,9 @@
-## 0.0.97
+## 0.0.98
 
-- Fix: Resolved minor bugs
 - Features: New Async notifier API's setLoading, setError and setData.
+- Refactored base notifier builder classes for better structure and clarity
+- Example: Simplified error handling in GreetingAsyncNotifier.
+           Updated import paths for async and counter notifier tabs.
 
 ## 0.0.93
 
