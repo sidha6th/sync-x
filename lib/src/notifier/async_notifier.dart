@@ -78,7 +78,17 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   /// }
   /// ```
   @protected
-  void setData(S data) => setState(state.toData(data));
+  void setData(
+    S data, {
+    bool forced = false,
+    bool notify = true,
+  }) {
+    return setState(
+      state.toData(data),
+      forced: forced,
+      notify: notify,
+    );
+  }
 
   /// Transitions the notifier to the error state with the given error information.
   ///
@@ -106,6 +116,7 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
         message: message,
         stackTrace: stackTrace,
       ),
+      forced: true,
     );
   }
 }

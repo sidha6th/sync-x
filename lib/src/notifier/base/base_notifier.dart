@@ -134,7 +134,7 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   @protected
   @mustCallSuper
   void setState(S newState, {bool forced = false, bool notify = true}) {
-    if (!identical(state, newState) || forced) _state = newState;
+    if (forced || !identical(state, newState)) _state = newState;
     if (notify) super.notifyListeners();
   }
 }
