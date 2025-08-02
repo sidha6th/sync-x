@@ -1,6 +1,4 @@
-import 'package:flutter/widgets.dart' show Widget, VoidCallback;
-import 'package:syncx/src/builders/base/base_notifier_builder.dart';
-import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
+part of '../base/base_notifier_builder.dart';
 
 /// A widget that listens to state changes from a [BaseNotifier] and triggers side effects.
 ///
@@ -8,8 +6,8 @@ import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 /// calls the [listener] callback for side effects, optionally using [listenWhen] to control when to listen.
 ///
 /// [N] is the type of [BaseNotifier] and [S] is the type of state managed by the notifier.
-class NotifierListener<N extends BaseNotifier<S>, S>
-    extends BaseNotifierBuilder<N, S> {
+class NotifierListener<N extends BaseNotifier<S>, S extends Object?>
+    extends _BaseNotifierBuilder<N, S> {
   /// Creates a [NotifierListener].
   ///
   /// [child] is the static child widget.
@@ -48,7 +46,7 @@ class NotifierListener<N extends BaseNotifier<S>, S>
   final bool Function(S previous, S current)? listenWhen;
 
   @override
-  void whenStateChanged(S previous, S current, VoidCallback reBuild) {
+  void whenStateChanged(S previous, S current, _) {
     if (listenWhen?.call(previous, current) ?? true) listener(current);
   }
 }

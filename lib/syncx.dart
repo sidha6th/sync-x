@@ -10,13 +10,15 @@
 /// - Provider integration and easy registration
 ///
 /// See the package README and example for usage details.
-library syncX;
+library SyncX;
 
-export 'package:provider/provider.dart';
+export 'package:provider/provider.dart' show ReadContext;
 
-export 'src/builders/notifier_builder.dart';
-export 'src/builders/notifier_consumer.dart';
-export 'src/builders/notifier_listener.dart';
+export 'src/builders/async/async_notifier_builder.dart';
+export 'src/builders/async/async_notifier_consumer.dart';
+export 'src/builders/async/async_notifier_listener.dart';
+export 'src/builders/base/base_notifier_builder.dart'
+    show NotifierBuilder, NotifierConsumer, NotifierListener;
 export 'src/notifier/base/base_notifier.dart' show AsyncNotifier, Notifier;
 export 'src/register/notifier_register.dart';
 export 'src/utils/models/async_state.dart';

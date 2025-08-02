@@ -100,7 +100,7 @@ class GreetingAsyncNotifier extends AsyncNotifier<String> {
     if (isSuccess) {
       return const AsyncState.data('Hello from AsyncNotifier!');
     }
-    return const AsyncState.error(ErrorState('Failed to load greeting'));
+    return const AsyncState.error('Failed to load greeting');
   }
 
   /// Updates the state by simulating an asynchronous operation.
@@ -191,15 +191,34 @@ NotifierConsumer<CounterNotifier, int>(
 
 **Async State Handling:**
 
+SyncX provides specialized widgets for handling asynchronous state:
+- `AsyncNotifierBuilder` – a wrapper over `NotifierBuilder` for async state, providing a convenient API for loading, data, and error UI.
+- `AsyncNotifierConsumer` – combines building and listening for side effects in async flows.
+- `AsyncNotifierListener` – listens for async state changes and triggers side effects without rebuilding the UI.
+
+**Direct usage with builder:**
 ```dart
-NotifierBuilder<GreetingAsyncNotifier, AsyncState<String>>(
-  builder: (context, state) => state.when(
-    loading: () => CircularProgressIndicator(),
-    data: (greeting) => Text(greeting),
-    error: (e) => Text('Error: ${e.message ?? e.error}'),
-  ),
+AsyncNotifierBuilder<GreetingAsyncNotifier, String>(
+  builder: (context, state) {
+    return state.when(
+      loading: () => const CircularProgressIndicator(),
+      data: (greeting) => Text(greeting),
+      error: (error) => Text('Error: \\${error.message}'),
+    );
+  },
 )
 ```
+
+**Convenient usage with .withData:**
+```dart
+AsyncNotifierBuilder<GreetingAsyncNotifier, String>.withData(
+  loadingBuilder: () => CircularProgressIndicator(),
+  dataBuilder: (greeting) => Text(greeting),
+  errorBuilder: (error) => Text('Error: \\${error.message}'),
+)
+```
+
+You can use `AsyncNotifierConsumer` and `AsyncNotifierListener` similarly to handle both UI and side effects for async state.
 
 ### 4. Invoking Notifier Methods
 
