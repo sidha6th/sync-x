@@ -1,3 +1,14 @@
+## 0.0.97
+
+- Fix: Resolved minor bugs
+- Features: New Async notifier API's setLoading, setError and setData.
+
+## 0.0.93
+
+- Added and expanded documentation for async widgets (`AsyncNotifierBuilder`, `AsyncNotifierConsumer`, `AsyncNotifierListener`) and core async state model(`AsyncState`).
+- Updated README: clarified async state handling, added examples for new async widgets, and explained their relationship to sync widgets.
+- Fix: Notifier builder bug
+
 ## 0.0.83
 
 - Updated: Description.

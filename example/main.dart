@@ -26,6 +26,21 @@ class GreetingAsyncNotifier extends AsyncNotifier<String> {
       return const AsyncState.data('Hello from AsyncNotifier!');
     });
   }
+
+  Future<void> updateState() async {
+    setState(state.toLoading());
+    // Consider this as a Network call
+    await Future.delayed(const Duration(seconds: 2));
+    final bool isSuccess = true; // Set to false to simulate error
+    if (isSuccess) {
+      return setState(state.toData('Success'));
+    }
+
+    // Replace 'errorObject' with your actual error object as needed
+    // return setState(
+    //   state.toError('..errorObject', message: 'Network call failed'),
+    // );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -33,9 +48,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NotifierRegister<CounterNotifier, int>(
+    return NotifierRegister(
       create: (_) => CounterNotifier(),
-      child: NotifierRegister<GreetingAsyncNotifier, AsyncState<String>>(
+      child: NotifierRegister(
         create: (_) => GreetingAsyncNotifier(),
         child: const MaterialApp(title: 'SyncX Example', home: HomeScreen()),
       ),
@@ -81,7 +96,7 @@ class CounterNotifierTab extends StatelessWidget {
             // Rebuilds only when the count changes
             NotifierBuilder<CounterNotifier, int>(
               buildWhen: (prev, curr) => prev != curr,
-              builder: (context, count) => Text(
+              builder: (count) => Text(
                 'Count: $count',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
@@ -102,7 +117,7 @@ class CounterNotifierTab extends StatelessWidget {
             NotifierConsumer<CounterNotifier, int>(
               buildWhen: (prev, curr) => prev != curr,
               listenWhen: (prev, curr) => curr > prev,
-              builder: (context, count) => Row(
+              builder: (count) => Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
@@ -133,17 +148,27 @@ class AsyncNotifierTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: NotifierBuilder<GreetingAsyncNotifier, AsyncState<String>>(
-        builder: (context, state) => state.when(
-          loading: () => const CircularProgressIndicator(),
-          data: (greeting) =>
-              Text(greeting, style: Theme.of(context).textTheme.headlineMedium),
-          error: (e) => Text(
-            'Error: ${e.message ?? e.error}',
-            style: const TextStyle(color: Colors.red),
-          ),
+    return Scaffold(
+      body: Center(
+        child: AsyncNotifierBuilder<GreetingAsyncNotifier, String>(
+          builder: (state) {
+            return state.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              data: (data) =>
+                  Text(data, style: Theme.of(context).textTheme.headlineMedium),
+              error: (error) => Text(
+                'Error: ${error.message ?? error.error}',
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
+          },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.refresh_outlined),
+        onPressed: () {
+          context.read<GreetingAsyncNotifier>().updateState();
+        },
       ),
     );
   }
