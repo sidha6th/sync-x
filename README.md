@@ -14,6 +14,7 @@ Flutter state management made easy: SyncX is a lightweight, flexible state manag
   - [Register the Notifier](#2-register-the-notifier)
   - [Consume State with Builders & Listeners](#3-consume-state-with-builders--listeners)
   - [Invoking Notifier Methods](#4-invoking-notifier-methods)
+  - [Lifecycle Methods](#5-lifecycle-methods)
 - [Bad Practices / Don’ts](#bad-practices--donts)
 - [Usage Patterns](#usage-patterns)
 - [Future Plans](#future-plans)
@@ -49,7 +50,6 @@ Flutter state management made easy: SyncX is a lightweight, flexible state manag
 A Notifier holds and updates your state:
 
 ```dart
-
 /// Extend [Notifier] for basic state management
 /// update state and notify listeners using [setState].
 class CounterNotifier extends Notifier<int> {
@@ -60,19 +60,32 @@ class CounterNotifier extends Notifier<int> {
   ///
   /// This method is called automatically once the instance is created.
   /// Use it to initialize resources or start listeners if needed.
+  ///
+  /// You can also override [onUpdate] to perform side effects when the state changes.
   @override
   void onInit(){
     // doSomething...
+  }
+  
+  @override
+  void onUpdate(int state) {
+    // Handle state changes, logging, side effects, etc.
+    print('State updated to: $state');
   }
 
   /// Increments the counter by 1 and notifies listeners.
   ///
   /// Use [setState] to update the state and notify any listening widgets.
   ///
-  /// [setState] also accepts two optional parameters:
-  ///   - [forced] (default: false): Forces the state update even if the value hasn't changed, useful for mutating iterable state.
+  /// [setState] accepts several optional parameters:
   ///   - [notify] (default: true): Controls whether listeners are notified and the UI is rebuilt.
+  ///   - [forced] (default: false): Forces the state update even if the value hasn't changed, useful for mutating iterable state.
+  ///   - [equalityCheck] (optional): Custom function to determine if state has changed.
   void increment() => setState(state + 1);
+  
+  /// Example with custom parameters:
+  void incrementSilently() => setState(state + 1, notify: false); // Update state silently without triggering a UI rebuild
+  void forceUpdate() => setState(state, forced: true); // Updates the state bypassing the equality check.
 }
 ```
 
@@ -82,8 +95,13 @@ For async state (loading/data/error):
 /// Extend [AsyncNotifier] to handle async operations such as network calls 
 /// to handle loading, data, and error states using [AsyncState].
 class GreetingAsyncNotifier extends AsyncNotifier<String> {
-  /// Creates a [GreetingAsyncNotifier] with an initial state.
+  /// Creates a [GreetingAsyncNotifier] that starts in loading state.
+  /// Use this when you want to start with loading and transition to data/error.
   GreetingAsyncNotifier() : super();
+
+  /// Creates a [GreetingAsyncNotifier] with initial data.
+  /// Use this when you have initial data and want to start in data state.
+  GreetingAsyncNotifier.withData(String initialData) : super.withData(initialData);
 
   /// Called when the notifier is first initialized.
   ///
@@ -102,6 +120,18 @@ class GreetingAsyncNotifier extends AsyncNotifier<String> {
     }
     return const AsyncState.error('Failed to load greeting');
   }
+  
+  @override
+  void onUpdate(BaseAsyncState<String> state) {
+    // Handle async state changes, logging, side effects, etc.
+    if (state.isLoading) {
+      print('Started loading data');
+    } else if (state.hasError) {
+      print('Error occurred: ${state.errorState?.message}');
+    } else if (state.data != null) {
+      print('Data loaded: ${state.data}');
+    }
+  }
 
   /// Updates the state by simulating an asynchronous operation.
   ///
@@ -112,18 +142,23 @@ class GreetingAsyncNotifier extends AsyncNotifier<String> {
   /// - If successful, sets the state to data with a success message.
   /// - If failed, sets the state to error with an error object and message.
   Future<void> updateState() async {
-    setState(state.toLoading());
+    setLoading(); // Transitions to loading state
     // Consider this as a Network call
     await Future.delayed(const Duration(seconds: 2));
     final bool isSuccess = true; // Set to false to simulate error
     if (isSuccess) {
-      return setState(state.toData('Success'));
-    }
-
-    // Replace 'errorObject' with your actual error object as needed
-    return setState(
-      state.toError('..errorObject', message: 'Network call failed'),
-    );
+     return setData('Success'); // Transitions to data state
+    } 
+    setError('Network error', message: 'Network call failed'); // Transitions to error state
+  }
+  
+  /// Example of using setData with custom parameters:
+  void updateDataSilently(String newData) {
+    setData(newData, notify: false); // Update state silently without triggering a UI rebuild
+  }
+  
+  void forceDataUpdate(String newData) {
+    setData(newData, forced: true); // Updates the state bypassing the equality check.
   }
 }
 ```
@@ -222,7 +257,7 @@ You can use `AsyncNotifierConsumer` and `AsyncNotifierListener` similarly to han
 
 ### 4. Invoking Notifier Methods
 
-To invoke a method inside your notifier (for example, to increment the counter), use the context extension or provider pattern in your widget. Here’s how you can call a notifier method from a button press:
+To invoke a method inside your notifier (for example, to increment the counter), use the context extension or provider pattern in your widget. Here's how you can call a notifier method from a button press:
 
 ```dart
 ElevatedButton(
@@ -232,6 +267,50 @@ ElevatedButton(
 ```
 
 This will call the `increment` method on your `CounterNotifier` and update the state accordingly.
+
+### 5. Lifecycle Methods
+
+SyncX provides lifecycle methods that you can override in your notifiers:
+
+**`onInit()`** - Called when the notifier is first created and attached to the widget tree:
+```dart
+@override
+void onInit() {
+  // Initialize resources, start listeners, etc.
+  print('Notifier initialized');
+}
+```
+
+**`onUpdate(state)`** - Called when the notifier's state changes:
+```dart
+@override
+void onUpdate(int state) {
+  // Handle state changes, logging, side effects, etc.
+  print('State updated to: $state');
+}
+```
+
+**For AsyncNotifier, `onInit()` returns a Future:**
+```dart
+@override
+Future<AsyncState<String>> onInit() async {
+  // Fetch initial data
+  final data = await _fetchData();
+  return AsyncState.data(data);
+}
+
+@override
+void onUpdate(BaseAsyncState<String> state) {
+  // Handle async state changes
+  if (state.isLoading) {
+    print('Started loading data');
+  } else if (state.hasError) {
+    print('Error occurred: ${state.errorState?.message}');
+  } else if (state.data != null) {
+    print('Data loaded: ${state.data}');
+  }
+}
+```
 
 ---
 

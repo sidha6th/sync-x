@@ -132,11 +132,33 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   /// ```
   void _setState(
     S next, {
-    required bool Function(S curr, S next) equalityCheck,
-    bool forced = false,
     bool notify = true,
+    bool forced = false,
+    bool Function(S curr, S next)? equalityCheck,
+    void Function(S state)? onUpdate,
   }) {
-    if (forced || !equalityCheck(_state, next)) _state = next;
+    if (forced ||
+        !(equalityCheck?.call(_state, next) ??
+            stateEqualityCheck(_state, next))) {
+      _state = next;
+      onUpdate?.call(next);
+    }
+
     if (notify) super.notifyListeners();
   }
+
+  /// A basic equality check that compares the current and next states using the `==` operator.
+  ///
+  /// This method is used as a default equality check when no custom equality check is provided.
+  /// It checks if the current and next states are equal using the `==` operator and also considers
+  /// object identity using [identical].
+  ///
+  /// [curr] is the current state.
+  /// [next] is the next state to compare.
+  ///
+  /// Returns `true` if the states are equal, otherwise `false`.
+  ///
+  @protected
+  bool stateEqualityCheck(S curr, S next) =>
+      curr == next || identical(curr, next);
 }

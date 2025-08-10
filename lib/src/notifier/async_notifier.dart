@@ -68,6 +68,8 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   /// Transitions the notifier to the data state with the given [data].
   ///
   /// [data] is the successful result of the async operation.
+  /// [forced] (default: false): Forces the state update even if the value hasn't changed.
+  /// [notify] (default: true): Controls whether listeners are notified and the UI is rebuilt.
   ///
   /// Use this when an async operation completes successfully.
   ///
@@ -75,6 +77,14 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   /// ```dart
   /// void onDataReceived(String data) {
   ///   setData(data);
+  /// }
+  ///
+  /// void updateSilently(String data) {
+  ///   setData(data, notify: false); // Update without notifying listeners
+  /// }
+  ///
+  /// void forceUpdate(String data) {
+  ///   setData(data, forced: true); // Updates the state bypassing the equality check
   /// }
   /// ```
   @protected
@@ -120,6 +130,21 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
     );
   }
 
+  /// Updates the state with the given [next] state.
+  ///
+  /// [next] is the new state to set.
+  /// [notify] (default: true): Controls whether listeners are notified and the UI is rebuilt.
+  /// [forced] (default: false): Forces the state update even if the value hasn't changed.
+  /// [equalityCheck] (optional): Custom function to determine if state has changed.
+  ///
+  /// This method provides fine-grained control over state updates and listener notifications.
+  ///
+  /// Example:
+  /// ```dart
+  /// void updateState(BaseAsyncState<String> newState) {
+  ///   setState(newState, notify: true, forced: false);
+  /// }
+  /// ```
   @protected
   void setState(
     BaseAsyncState<S> next, {
@@ -127,13 +152,28 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
     bool forced = false,
     bool Function(S? curr, S? next)? equalityCheck,
   }) {
-    super._setState(
+    _setState(
       next,
       notify: notify,
-      forced: forced || !identical(state, next),
+      forced: forced,
+      onUpdate: onUpdate,
       equalityCheck: (curr, next) =>
           equalityCheck?.call(curr.data, next.data) ??
-          identical(curr.data, next.data),
+          this.stateEqualityCheck(curr, next),
     );
   }
+
+  /// Custom equality check for async states.
+  ///
+  /// Compares the data fields of two async states to determine if they are equal.
+  /// Override this method to provide custom equality logic.
+  ///
+  /// [curr] is the current state.
+  /// [next] is the new state.
+  ///
+  /// Returns true if the states are considered equal, false otherwise.
+  @override
+  @protected
+  bool stateEqualityCheck(BaseAsyncState<S> curr, BaseAsyncState<S> next) =>
+      curr.data == next.data || identical(curr.data, next.data);
 }

@@ -1,3 +1,8 @@
+## 0.1.2
+
+- Feature: Added new `onUpdate` lifecycle API for notifiers to handle state changes and side effects.
+- Updates: Internal changes.
+
 ## 0.0.97
 
 - Fix: Resolved minor bugs
