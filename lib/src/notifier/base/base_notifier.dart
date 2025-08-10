@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart'
         kFlutterMemoryAllocationsEnabled,
         ChangeNotifier,
         protected,
-        mustCallSuper,
         describeIdentity;
 import 'package:syncx/src/utils/models/async_state.dart';
 import 'package:syncx/src/utils/models/base/base_async_state.dart';
@@ -112,9 +111,9 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   @protected
   S get state => _state;
 
-  /// Updates the state to [newState] and optionally notifies listeners.
+  /// Updates the state to [next] and optionally notifies listeners.
   ///
-  /// [newState] is the new state value to set.
+  /// [next] is the new state value to set.
   /// [forced] can be set to true to force the update even if the state is unchanged.
   ///   This is useful for manipulating iterable state where the reference might not change.
   /// [notify] controls whether listeners are notified after the update.
@@ -131,10 +130,13 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   /// // Update without notifying listeners
   /// setState(newValue, notify: false);
   /// ```
-  @protected
-  @mustCallSuper
-  void setState(S newState, {bool forced = false, bool notify = true}) {
-    if (forced || !identical(state, newState)) _state = newState;
+  void _setState(
+    S next, {
+    required bool Function(S curr, S next) equalityCheck,
+    bool forced = false,
+    bool notify = true,
+  }) {
+    if (forced || !equalityCheck(_state, next)) _state = next;
     if (notify) super.notifyListeners();
   }
 }

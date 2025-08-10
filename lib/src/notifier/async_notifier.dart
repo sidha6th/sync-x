@@ -63,7 +63,7 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   /// }
   /// ```
   @protected
-  void setLoading() => setState(state.toLoading());
+  void setLoading() => setState(state.toLoading(), forced: true);
 
   /// Transitions the notifier to the data state with the given [data].
   ///
@@ -84,9 +84,9 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
     bool notify = true,
   }) {
     return setState(
-      state.toData(data),
-      forced: forced,
       notify: notify,
+      state.toData(data),
+      forced: forced || state.isLoading || state.hasError,
     );
   }
 
@@ -117,6 +117,23 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
         stackTrace: stackTrace,
       ),
       forced: true,
+    );
+  }
+
+  @protected
+  void setState(
+    BaseAsyncState<S> next, {
+    bool notify = true,
+    bool forced = false,
+    bool Function(S? curr, S? next)? equalityCheck,
+  }) {
+    super._setState(
+      next,
+      notify: notify,
+      forced: forced || !identical(state, next),
+      equalityCheck: (curr, next) =>
+          equalityCheck?.call(curr.data, next.data) ??
+          identical(curr.data, next.data),
     );
   }
 }

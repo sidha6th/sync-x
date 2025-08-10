@@ -1,3 +1,4 @@
+import 'package:syncx/src/utils/models/async_state.dart';
 import 'package:syncx/src/utils/models/error_state.dart';
 
 /// Abstract base class for representing asynchronous state in a notifier or state management flow.
@@ -40,7 +41,7 @@ abstract class BaseAsyncState<S extends Object?> {
   /// [stackTrace] is an optional stack trace for debugging.
   ///
   /// Use this to transition to an error state from any other state.
-  BaseAsyncState<S> toError(
+  AsyncState<S> toError(
     Object error, {
     String? message,
     StackTrace? stackTrace,
@@ -49,12 +50,12 @@ abstract class BaseAsyncState<S extends Object?> {
   /// Returns a new state representing the loading state.
   ///
   /// Use this to transition to a loading state from any other state.
-  BaseAsyncState<S> toLoading();
+  AsyncState<S> toLoading();
 
   /// Returns a new state with the given [data].
   ///
   /// Use this to transition to a data state from any other state.
-  BaseAsyncState<S> toData(S data);
+  AsyncState<S> toData(S data);
 
   /// The data held by the state, if any.
   ///

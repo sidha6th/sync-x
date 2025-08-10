@@ -10,4 +10,19 @@ abstract class Notifier<S> extends BaseNotifier<S> with NotifierLifecycle {
   Notifier(super.state) {
     _initialize();
   }
+
+  @protected
+  void setState(
+    S next, {
+    bool notify = true,
+    bool forced = false,
+    bool Function(S curr, S next)? equalityCheck,
+  }) {
+    super._setState(
+      next,
+      notify: notify,
+      forced: forced,
+      equalityCheck: equalityCheck ?? identical,
+    );
+  }
 }
