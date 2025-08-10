@@ -15,24 +15,29 @@ abstract class BaseAsyncState<S extends Object?> {
   /// Creates a [BaseAsyncState] with optional [data] and [errorState].
   ///
   /// This constructor is typically used by subclasses.
-  const BaseAsyncState({this.data, this.errorState});
+  const BaseAsyncState({required this.status, this.data, this.errorState});
 
   /// Creates a data state with the given [data].
   ///
   /// Use this when the asynchronous operation has completed successfully and you have data to provide.
-  const BaseAsyncState.data(this.data) : errorState = null;
+  const BaseAsyncState.data(this.data)
+      : errorState = null,
+        status = AsyncStatus.data;
 
   /// Creates a loading state.
   ///
   /// Use this when the asynchronous operation is in progress.
   const BaseAsyncState.loading()
       : data = null,
-        errorState = null;
+        errorState = null,
+        status = AsyncStatus.loading;
 
   /// Creates an error state with the given [errorState].
   ///
   /// Use this when the asynchronous operation has failed and you want to provide error details.
-  const BaseAsyncState.error(ErrorState this.errorState) : data = null;
+  const BaseAsyncState.error(ErrorState this.errorState)
+      : data = null,
+        status = AsyncStatus.error;
 
   /// Returns a new state representing an error with the given [error].
   ///
@@ -61,6 +66,8 @@ abstract class BaseAsyncState<S extends Object?> {
   ///
   /// This is non-null only in the data state.
   final S? data;
+
+  final AsyncStatus status;
 
   /// The error information held by the state, if any.
   ///
@@ -109,4 +116,10 @@ abstract class BaseAsyncState<S extends Object?> {
     void Function()? loading,
     void Function(ErrorState e)? error,
   });
+}
+
+enum AsyncStatus {
+  loading,
+  data,
+  error,
 }

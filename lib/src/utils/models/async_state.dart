@@ -15,16 +15,12 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
   /// Creates a loading state.
   ///
   /// Use this when the asynchronous operation is in progress.
-  const AsyncState.loading()
-      : _isLoading = true,
-        super.loading();
+  const AsyncState.loading() : super.loading();
 
   /// Creates a data state with the given [data].
   ///
   /// Use this when the asynchronous operation has completed successfully and you have data to provide.
-  const AsyncState.data(super.data)
-      : _isLoading = false,
-        super.data();
+  const AsyncState.data(super.data) : super.data();
 
   /// Creates an error state with the given error information.
   ///
@@ -37,8 +33,7 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
     Object error, {
     String? message,
     StackTrace? stackTrace,
-  })  : _isLoading = false,
-        super.error(
+  }) : super.error(
           ErrorState(error, message: message, stackTrace: stackTrace),
         );
 
@@ -49,34 +44,32 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
   /// Use this when you already have an [ErrorState] object and want to create an error state.
   const AsyncState.errorWithState(
     super.errorState,
-  )   : _isLoading = false,
-        super.error();
+  ) : super.error();
 
   /// Internal constructor for custom state transitions.
   ///
   /// [data] is the data to hold, if any.
   /// [errorState] is the error information, if any.
   /// [isLoading] indicates whether the state is loading.
-  const AsyncState._({super.data, super.errorState, bool isLoading = false})
-      : _isLoading = isLoading,
-        super();
-
-  /// Whether the state is currently loading.
-  final bool _isLoading;
+  const AsyncState._({
+    required super.status,
+    super.data,
+    super.errorState,
+  }) : super();
 
   /// Returns true if the state is loading.
   @override
-  bool get isLoading => _isLoading;
+  bool get isLoading => status == AsyncStatus.loading;
 
   /// Returns true if the state represents an error.
   @override
-  bool get hasError => errorState != null;
+  bool get hasError => status == AsyncStatus.error;
 
   /// Returns a new [AsyncState] representing the loading state.
   ///
   /// Use this to transition to a loading state from any other state.
   @override
-  AsyncState<S> toLoading() => _copyWith(isLoading: true);
+  AsyncState<S> toLoading() => _copyWith(status: AsyncStatus.loading);
 
   /// Returns a new [AsyncState] with the given [data].
   ///
@@ -98,7 +91,7 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
     StackTrace? stackTrace,
   }) {
     return _copyWith(
-      isLoading: false,
+      status: AsyncStatus.error,
       errorState: ErrorState(
         error,
         message: message,
@@ -120,11 +113,14 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
     required T Function(S data) data,
     required T Function(ErrorState e) error,
   }) {
-    if (_isLoading) return loading();
-
-    if (hasError) return error(errorState!);
-
-    return data(this.data as S);
+    switch (status) {
+      case AsyncStatus.loading:
+        return loading();
+      case AsyncStatus.error:
+        return error(errorState!);
+      case AsyncStatus.data:
+        return data(this.data as S);
+    }
   }
 
   /// Optional pattern matching for async state, focused on data extraction.
@@ -150,11 +146,14 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
     void Function()? loading,
     void Function(ErrorState e)? error,
   }) {
-    if (_isLoading) return loading?.call();
-
-    if (hasError) return error?.call(errorState!);
-
-    return data(this.data as S);
+    switch (status) {
+      case AsyncStatus.loading:
+        return loading?.call();
+      case AsyncStatus.error:
+        return error?.call(errorState!);
+      case AsyncStatus.data:
+        return data(this.data as S);
+    }
   }
 
   /// Returns a copy of this state with optional new values.
@@ -166,13 +165,13 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
   /// This is used internally for state transitions.
   AsyncState<S> _copyWith({
     S? data,
-    bool? isLoading,
+    AsyncStatus? status,
     ErrorState? errorState,
   }) {
     return AsyncState<S>._(
       errorState: errorState,
       data: data ?? this.data,
-      isLoading: isLoading ?? this._isLoading,
+      status: status ?? this.status,
     );
   }
 
@@ -180,20 +179,23 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is AsyncState<S> &&
-        other._isLoading == _isLoading &&
+        other.status == status &&
         other.data == data &&
         other.errorState == errorState;
   }
 
   @override
-  int get hashCode => Object.hash(_isLoading, data, errorState);
+  int get hashCode => Object.hash(status, data, errorState);
 
   @override
   String toString() {
-    if (_isLoading) return 'AsyncState<$S>.loading()';
-
-    if (hasError) return 'AsyncState<$S>.error($errorState)';
-
-    return 'AsyncState<$S>.data($data)';
+    switch (status) {
+      case AsyncStatus.loading:
+        return 'AsyncState<$S>.loading()';
+      case AsyncStatus.error:
+        return 'AsyncState<$S>.error($errorState)';
+      case AsyncStatus.data:
+        return 'AsyncState<$S>.data($data)';
+    }
   }
 }

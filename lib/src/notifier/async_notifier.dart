@@ -95,8 +95,8 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   }) {
     return setState(
       notify: notify,
+      forced: forced,
       state.toData(data),
-      forced: forced || state.isLoading || state.hasError,
     );
   }
 
@@ -158,8 +158,9 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
       forced: forced,
       onUpdate: onUpdate,
       equalityCheck: (curr, next) =>
-          equalityCheck?.call(curr.data, next.data) ??
-          this.stateEqualityCheck(curr, next),
+          (equalityCheck?.call(curr.data, next.data) ??
+              this.stateEqualityCheck(curr, next)) ||
+          curr.status == next.status,
     );
   }
 
