@@ -5,10 +5,8 @@ import 'package:flutter/foundation.dart'
         kFlutterMemoryAllocationsEnabled,
         ChangeNotifier,
         protected,
-        mustCallSuper,
         describeIdentity;
 import 'package:syncx/src/utils/models/async_state.dart';
-import 'package:syncx/src/utils/models/base/base_async_state.dart';
 
 part '../async_notifier.dart';
 part '../lifecycle_mixin/async_notifier_lifecycle.dart';
@@ -112,9 +110,9 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   @protected
   S get state => _state;
 
-  /// Updates the state to [newState] and optionally notifies listeners.
+  /// Updates the state to [next] and optionally notifies listeners.
   ///
-  /// [newState] is the new state value to set.
+  /// [next] is the new state value to set.
   /// [forced] can be set to true to force the update even if the state is unchanged.
   ///   This is useful for manipulating iterable state where the reference might not change.
   /// [notify] controls whether listeners are notified after the update.
@@ -131,10 +129,34 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   /// // Update without notifying listeners
   /// setState(newValue, notify: false);
   /// ```
-  @protected
-  @mustCallSuper
-  void setState(S newState, {bool forced = false, bool notify = true}) {
-    if (!identical(state, newState) || forced) _state = newState;
+  void _setState(
+    S next, {
+    bool notify = true,
+    bool forced = false,
+    void Function(S state)? onUpdate,
+    bool Function(S curr, S next)? equalityCheck,
+  }) {
+    final shouldUpdate = forced ||
+        !(equalityCheck?.call(_state, next) ??
+            stateEqualityCheck(_state, next));
+    if (!shouldUpdate) return;
+
+    _state = next;
+    onUpdate?.call(next);
     if (notify) super.notifyListeners();
   }
+
+  /// A basic equality check that compares the current and next states using the `==` operator.
+  ///
+  /// This method is used as a default equality check when no custom equality check is provided.
+  /// It checks if the current and next states are equal using the `==` operator and also considers
+  /// object identity using [identical].
+  ///
+  /// [curr] is the current state.
+  /// [next] is the next state to compare.
+  ///
+  /// Returns `true` if the states are equal, otherwise `false`.
+  ///
+  @protected
+  bool stateEqualityCheck(S curr, S next) => curr == next;
 }

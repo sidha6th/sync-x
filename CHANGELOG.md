@@ -1,9 +1,12 @@
-## 0.0.98
+## 0.1.2
 
+- Feature: Added new `onUpdate` lifecycle API for notifiers to handle state changes and side effects.
+- Updates: Internal changes.
+
+## 0.0.97
+
+- Fix: Resolved minor bugs
 - Features: New Async notifier API's setLoading, setError and setData.
-- Refactored base notifier builder classes for better structure and clarity
-- Example: Simplified error handling in GreetingAsyncNotifier.
-           Updated import paths for async and counter notifier tabs.
 
 ## 0.0.93
 
