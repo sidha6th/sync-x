@@ -176,12 +176,8 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is AsyncState<S> &&
-        other.status == status &&
-        other.data == data &&
-        other.errorState == errorState;
+  bool operator ==(covariant AsyncState<S> other) {
+    return other.status == status;
   }
 
   @override

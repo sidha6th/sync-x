@@ -134,16 +134,16 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
     S next, {
     bool notify = true,
     bool forced = false,
-    bool Function(S curr, S next)? equalityCheck,
     void Function(S state)? onUpdate,
+    bool Function(S curr, S next)? equalityCheck,
   }) {
-    if (forced ||
+    final shouldUpdate = forced ||
         !(equalityCheck?.call(_state, next) ??
-            stateEqualityCheck(_state, next))) {
-      _state = next;
-      onUpdate?.call(next);
-    }
+            stateEqualityCheck(_state, next));
+    if (!shouldUpdate) return;
 
+    _state = next;
+    onUpdate?.call(next);
     if (notify) super.notifyListeners();
   }
 
@@ -159,6 +159,5 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   /// Returns `true` if the states are equal, otherwise `false`.
   ///
   @protected
-  bool stateEqualityCheck(S curr, S next) =>
-      curr == next || identical(curr, next);
+  bool stateEqualityCheck(S curr, S next) => curr == next;
 }

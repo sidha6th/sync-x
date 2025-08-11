@@ -159,8 +159,8 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
       onUpdate: onUpdate,
       equalityCheck: (curr, next) =>
           (equalityCheck?.call(curr.data, next.data) ??
-              this.stateEqualityCheck(curr, next)) ||
-          curr.status == next.status,
+              this.stateEqualityCheck(curr, next)) &&
+          curr == next,
     );
   }
 
@@ -176,5 +176,5 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   @override
   @protected
   bool stateEqualityCheck(BaseAsyncState<S> curr, BaseAsyncState<S> next) =>
-      curr.data == next.data || identical(curr.data, next.data);
+      curr.data == next.data;
 }
