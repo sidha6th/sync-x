@@ -2,11 +2,10 @@ import 'package:flutter/widgets.dart' show VoidCallback, Widget;
 import 'package:syncx/src/builders/base/base_notifier_builder.dart'
     show NotifierConsumer;
 import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
-import 'package:syncx/src/utils/models/async_state.dart';
-import 'package:syncx/src/utils/models/base/base_async_state.dart';
+import 'package:syncx/src/utils/models/async_state.dart' show BaseAsyncState;
 import 'package:syncx/src/utils/models/error_state.dart';
 
-/// A widget that rebuilds and listens when the [AsyncState] of the provided [BaseNotifier] changes.
+/// A widget that rebuilds and listens when the [BaseAsyncState] of the provided [BaseNotifier] changes.
 ///
 /// [AsyncNotifierConsumer] is a convenience widget for listening to an asynchronous [BaseNotifier],
 /// rebuilding its child whenever the state changes, and performing side effects via listeners.
@@ -26,12 +25,12 @@ class AsyncNotifierConsumer<N extends BaseNotifier<BaseAsyncState<S>>,
   });
 
   ///
-  /// [dataBuilder] is called to build the widget tree when the state is [AsyncState.data].
-  /// [loadingBuilder] is called when the state is [AsyncState.loading].
-  /// [errorBuilder] is called when the state is [AsyncState.error].
+  /// [dataBuilder] is called to build the widget tree when the state is [BaseAsyncState.data].
+  /// [loadingBuilder] is called when the state is [BaseAsyncState.loading].
+  /// [errorBuilder] is called when the state is [BaseAsyncState.error].
   ///
   /// [dataListener], [loadingListener], and [errorListener] are optional callbacks invoked for side effects
-  /// when the state is [AsyncState.data], [AsyncState.loading], or [AsyncState.error], respectively.
+  /// when the state is [BaseAsyncState.data], [BaseAsyncState.loading], or [BaseAsyncState.error], respectively.
   ///
   /// [buildWhen] is an optional predicate that determines whether to rebuild when the data changes.
   /// [listenWhen] is an optional predicate that determines whether to call listeners when the data changes.
@@ -54,22 +53,22 @@ class AsyncNotifierConsumer<N extends BaseNotifier<BaseAsyncState<S>>,
   ///
   /// [key] is the widget key.
   AsyncNotifierConsumer.withData({
-    /// Called when the state is [AsyncState.loading].
+    /// Called when the state is [BaseAsyncState.loading].
     required final Widget Function() loadingBuilder,
 
-    /// Called when the state is [AsyncState.data].
+    /// Called when the state is [BaseAsyncState.data].
     required final Widget Function(S state) dataBuilder,
 
-    /// Called when the state is [AsyncState.error].
+    /// Called when the state is [BaseAsyncState.error].
     required final Widget Function(ErrorState error) errorBuilder,
 
-    /// Optional callback for side effects when the state is [AsyncState.data].
+    /// Optional callback for side effects when the state is [BaseAsyncState.data].
     final void Function(S data)? dataListener,
 
-    /// Optional callback for side effects when the state is [AsyncState.loading].
+    /// Optional callback for side effects when the state is [BaseAsyncState.loading].
     final VoidCallback? loadingListener,
 
-    /// Optional callback for side effects when the state is [AsyncState.error].
+    /// Optional callback for side effects when the state is [BaseAsyncState.error].
     final void Function(ErrorState error)? errorListener,
     bool Function(S? previous, S? current)? buildWhen,
     bool Function(S? previous, S? current)? listenWhen,

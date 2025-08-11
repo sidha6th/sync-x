@@ -1,5 +1,4 @@
-import 'package:syncx/src/utils/models/async_state.dart';
-import 'package:syncx/src/utils/models/error_state.dart';
+part of '../async_state.dart';
 
 /// Abstract base class for representing asynchronous state in a notifier or state management flow.
 ///
@@ -15,14 +14,18 @@ abstract class BaseAsyncState<S extends Object?> {
   /// Creates a [BaseAsyncState] with optional [data] and [errorState].
   ///
   /// This constructor is typically used by subclasses.
-  const BaseAsyncState({required this.status, this.data, this.errorState});
+  const BaseAsyncState({
+    required AsyncStatus status,
+    this.data,
+    this.errorState,
+  }) : _status = status;
 
   /// Creates a data state with the given [data].
   ///
   /// Use this when the asynchronous operation has completed successfully and you have data to provide.
   const BaseAsyncState.data(this.data)
       : errorState = null,
-        status = AsyncStatus.data;
+        _status = AsyncStatus.data;
 
   /// Creates a loading state.
   ///
@@ -30,14 +33,14 @@ abstract class BaseAsyncState<S extends Object?> {
   const BaseAsyncState.loading()
       : data = null,
         errorState = null,
-        status = AsyncStatus.loading;
+        _status = AsyncStatus.loading;
 
   /// Creates an error state with the given [errorState].
   ///
   /// Use this when the asynchronous operation has failed and you want to provide error details.
-  const BaseAsyncState.error(ErrorState this.errorState)
+  const BaseAsyncState.error(this.errorState)
       : data = null,
-        status = AsyncStatus.error;
+        _status = AsyncStatus.error;
 
   /// Returns a new state representing an error with the given [error].
   ///
@@ -67,18 +70,19 @@ abstract class BaseAsyncState<S extends Object?> {
   /// This is non-null only in the data state.
   final S? data;
 
-  final AsyncStatus status;
-
   /// The error information held by the state, if any.
   ///
   /// This is non-null only in the error state.
   final ErrorState? errorState;
 
-  /// Whether the state represents a loading state.
-  bool get isLoading;
+  /// Returns true if the state is loading.
+  bool get isLoading => _status == AsyncStatus.loading;
 
-  /// Whether the state represents an error state.
-  bool get hasError;
+  /// Returns true if the state represents an error.
+  bool get hasError => _status == AsyncStatus.error;
+
+  /// The status of the state.
+  final AsyncStatus _status;
 
   /// Pattern matching for async state.
   ///
@@ -118,6 +122,7 @@ abstract class BaseAsyncState<S extends Object?> {
   });
 }
 
+/// The status of the state.
 enum AsyncStatus {
   loading,
   data,

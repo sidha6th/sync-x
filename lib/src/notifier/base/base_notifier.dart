@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart'
         protected,
         describeIdentity;
 import 'package:syncx/src/utils/models/async_state.dart';
-import 'package:syncx/src/utils/models/base/base_async_state.dart';
 
 part '../async_notifier.dart';
 part '../lifecycle_mixin/async_notifier_lifecycle.dart';

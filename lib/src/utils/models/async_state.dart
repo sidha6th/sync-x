@@ -1,5 +1,6 @@
-import 'package:syncx/src/utils/models/base/base_async_state.dart';
 import 'package:syncx/src/utils/models/error_state.dart';
+
+part 'base/base_async_state.dart';
 
 /// Represents the state of an asynchronous operation, encapsulating loading, data, and error states.
 ///
@@ -33,37 +34,22 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
     Object error, {
     String? message,
     StackTrace? stackTrace,
-  }) : super.error(
-          ErrorState(error, message: message, stackTrace: stackTrace),
-        );
+  }) : super.error(ErrorState(error, message: message, stackTrace: stackTrace));
 
   /// Creates an error state with an existing [ErrorState].
   ///
   /// [errorState] is the error information to use.
   ///
   /// Use this when you already have an [ErrorState] object and want to create an error state.
-  const AsyncState.errorWithState(
-    super.errorState,
-  ) : super.error();
+  const AsyncState.errorWithState(super.errorState) : super.error();
 
   /// Internal constructor for custom state transitions.
   ///
   /// [data] is the data to hold, if any.
   /// [errorState] is the error information, if any.
   /// [isLoading] indicates whether the state is loading.
-  const AsyncState._({
-    required super.status,
-    super.data,
-    super.errorState,
-  }) : super();
-
-  /// Returns true if the state is loading.
-  @override
-  bool get isLoading => status == AsyncStatus.loading;
-
-  /// Returns true if the state represents an error.
-  @override
-  bool get hasError => status == AsyncStatus.error;
+  const AsyncState._({required super.status, super.data, super.errorState})
+      : super();
 
   /// Returns a new [AsyncState] representing the loading state.
   ///
@@ -92,11 +78,7 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
   }) {
     return _copyWith(
       status: AsyncStatus.error,
-      errorState: ErrorState(
-        error,
-        message: message,
-        stackTrace: stackTrace,
-      ),
+      errorState: ErrorState(error, message: message, stackTrace: stackTrace),
     );
   }
 
@@ -113,7 +95,7 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
     required T Function(S data) data,
     required T Function(ErrorState e) error,
   }) {
-    switch (status) {
+    switch (_status) {
       case AsyncStatus.loading:
         return loading();
       case AsyncStatus.error:
@@ -146,7 +128,7 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
     void Function()? loading,
     void Function(ErrorState e)? error,
   }) {
-    switch (status) {
+    switch (_status) {
       case AsyncStatus.loading:
         return loading?.call();
       case AsyncStatus.error:
@@ -171,21 +153,21 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
     return AsyncState<S>._(
       errorState: errorState,
       data: data ?? this.data,
-      status: status ?? this.status,
+      status: status ?? _status,
     );
   }
 
   @override
   bool operator ==(covariant AsyncState<S> other) {
-    return other.status == status;
+    return other._status == _status;
   }
 
   @override
-  int get hashCode => Object.hash(status, data, errorState);
+  int get hashCode => Object.hash(_status, data, errorState);
 
   @override
   String toString() {
-    switch (status) {
+    switch (_status) {
       case AsyncStatus.loading:
         return 'AsyncState<$S>.loading()';
       case AsyncStatus.error:
