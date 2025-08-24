@@ -18,7 +18,6 @@ class AsyncNotifierListener<N extends BaseNotifier<BaseAsyncState<S>>,
     required super.child,
     required super.listener,
     super.listenWhen,
-    super.notifier,
     super.onInit,
     super.key,
   });
@@ -60,7 +59,6 @@ class AsyncNotifierListener<N extends BaseNotifier<BaseAsyncState<S>>,
     /// Optional callback for side effects when the state is [BaseAsyncState.error].
     final void Function(ErrorState error)? errorListener,
     bool Function(S? previous, S? current)? listenWhen,
-    super.notifier,
     super.onInit,
     super.key,
   }) : super(

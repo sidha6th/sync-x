@@ -4,6 +4,7 @@ import 'package:syncx/src/builders/base/base_notifier_builder.dart'
 import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 import 'package:syncx/src/utils/models/async_state.dart' show BaseAsyncState;
 import 'package:syncx/src/utils/models/error_state.dart';
+import 'package:syncx/src/utils/type.dart';
 
 /// A widget that rebuilds and listens when the [BaseAsyncState] of the provided [BaseNotifier] changes.
 ///
@@ -16,10 +17,9 @@ class AsyncNotifierConsumer<N extends BaseNotifier<BaseAsyncState<S>>,
   /// Creates an [AsyncNotifierConsumer].
   const AsyncNotifierConsumer({
     required super.builder,
-    required super.listener,
+    required void Function(BaseAsyncState<S>) super.listener,
     super.buildWhen,
     super.listenWhen,
-    super.notifier,
     super.onInit,
     super.key,
   });
@@ -54,13 +54,14 @@ class AsyncNotifierConsumer<N extends BaseNotifier<BaseAsyncState<S>>,
   /// [key] is the widget key.
   AsyncNotifierConsumer.withData({
     /// Called when the state is [BaseAsyncState.loading].
-    required final Widget Function() loadingBuilder,
+    required final Widget Function(Widget? child) loadingBuilder,
 
     /// Called when the state is [BaseAsyncState.data].
-    required final Widget Function(S state) dataBuilder,
+    required final BuilderCallback<S> dataBuilder,
 
     /// Called when the state is [BaseAsyncState.error].
-    required final Widget Function(ErrorState error) errorBuilder,
+    required final Widget Function(ErrorState error, Widget? child)
+        errorBuilder,
 
     /// Optional callback for side effects when the state is [BaseAsyncState.data].
     final void Function(S data)? dataListener,
@@ -72,7 +73,6 @@ class AsyncNotifierConsumer<N extends BaseNotifier<BaseAsyncState<S>>,
     final void Function(ErrorState error)? errorListener,
     bool Function(S? previous, S? current)? buildWhen,
     bool Function(S? previous, S? current)? listenWhen,
-    super.notifier,
     super.onInit,
     super.key,
   }) : super(
@@ -81,10 +81,10 @@ class AsyncNotifierConsumer<N extends BaseNotifier<BaseAsyncState<S>>,
             loading: () => loadingListener?.call(),
             data: (data) => dataListener?.call(data),
           ),
-          builder: (state) => state.when(
-            data: dataBuilder,
-            error: errorBuilder,
-            loading: loadingBuilder,
+          builder: (state, child) => state.when(
+            loading: () => loadingBuilder(child),
+            data: (data) => dataBuilder(data, child),
+            error: (error) => errorBuilder(error, child),
           ),
           buildWhen: (previous, current) =>
               buildWhen?.call(previous.data, current.data) ?? true,

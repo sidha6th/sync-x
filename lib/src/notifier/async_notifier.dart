@@ -176,5 +176,5 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   @override
   @protected
   bool stateEqualityCheck(BaseAsyncState<S> curr, BaseAsyncState<S> next) =>
-      curr.data == next.data;
+      curr == next;
 }

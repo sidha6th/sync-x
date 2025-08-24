@@ -30,20 +30,10 @@ class NotifierBuilder<N extends BaseNotifier<S>, S extends Object?>
   ///
   /// [key] is the widget key.
   const NotifierBuilder({
-    required Widget Function(S state) super.builder,
-    super.notifier,
-    this.buildWhen,
+    required BuilderCallback<S> super.builder,
+    super.buildWhen,
     super.onInit,
+    super.child,
     super.key,
   });
-
-  /// Optional predicate to determine whether to rebuild when the state changes.
-  ///
-  /// If [buildWhen] returns true, the widget will rebuild. If null, always rebuilds.
-  final bool Function(S previous, S current)? buildWhen;
-
-  @override
-  void whenStateChanged(S previous, S current, VoidCallback reBuild) {
-    if (buildWhen?.call(previous, current) ?? true) reBuild();
-  }
 }
