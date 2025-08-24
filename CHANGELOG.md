@@ -1,7 +1,25 @@
-## 0.1.0
+## 0.1.9
 
-- Feature: Added new `onUpdate` lifecycle API for notifiers to handle state changes and side effects.
-- Updates: Internal changes.
+- **BREAKING CHANGE**: Modified builder callback signatures from `(context, state)` to `(state, child)` for all widgets (`NotifierBuilder`, `NotifierConsumer`, `AsyncNotifierBuilder`, `AsyncNotifierConsumer`). This change improves consistency and removes unnecessary context parameter.
+- **Feature**: Added new `onUpdate` lifecycle API for notifiers to handle state changes and side effects.
+- **Feature**: Enhanced async widgets with `.withData` constructors for cleaner, more readable async state handling.
+- **Feature**: Improved `AsyncNotifierBuilder`, `AsyncNotifierConsumer`, and `AsyncNotifierListener` with convenient APIs.
+- **Enhancement**: Better type safety and reduced boilerplate for async state management.
+- **Internal**: Performance improvements and code optimizations.
+
+**Migration Guide:**
+Update your builder callbacks from:
+```dart
+// Old API (0.0.x)
+NotifierBuilder<MyNotifier, MyState>(
+  builder: (context, state) => Text('$state'),
+)
+
+// New API (0.1.0+)
+NotifierBuilder<MyNotifier, MyState>(
+  builder: (state, child) => Text('$state'),
+)
+```
 
 ## 0.0.97
 

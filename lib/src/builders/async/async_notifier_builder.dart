@@ -4,6 +4,7 @@ import 'package:syncx/src/builders/base/base_notifier_builder.dart'
 import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
 import 'package:syncx/src/utils/models/async_state.dart' show BaseAsyncState;
 import 'package:syncx/src/utils/models/error_state.dart';
+import 'package:syncx/src/utils/type.dart';
 
 /// A widget that rebuilds when the [BaseAsyncState] of the provided [BaseNotifier] changes.
 ///
@@ -17,7 +18,6 @@ class AsyncNotifierBuilder<N extends BaseNotifier<BaseAsyncState<S>>,
   const AsyncNotifierBuilder({
     required super.builder,
     super.buildWhen,
-    super.notifier,
     super.onInit,
     super.key,
   });
@@ -48,22 +48,22 @@ class AsyncNotifierBuilder<N extends BaseNotifier<BaseAsyncState<S>>,
   /// [key] is the widget key.
   AsyncNotifierBuilder.withData({
     /// Called when the state is [BaseAsyncState.loading].
-    required final Widget Function() loadingBuilder,
+    required final Widget Function(Widget? child) loadingBuilder,
 
     /// Called when the state is [BaseAsyncState.data].
-    required final Widget Function(S state) dataBuilder,
+    required final BuilderCallback<S> dataBuilder,
 
     /// Called when the state is [BaseAsyncState.error].
-    required final Widget Function(ErrorState error) errorBuilder,
+    required final Widget Function(ErrorState error, Widget? child)
+        errorBuilder,
     final bool Function(S? previous, S? current)? buildWhen,
-    super.notifier,
     super.onInit,
     super.key,
   }) : super(
-          builder: (state) => state.when(
-            data: dataBuilder,
-            error: errorBuilder,
-            loading: loadingBuilder,
+          builder: (state, child) => state.when(
+            loading: () => loadingBuilder(child),
+            data: (data) => dataBuilder(data, child),
+            error: (error) => errorBuilder(error, child),
           ),
           buildWhen: (previous, current) =>
               buildWhen?.call(previous.data, current.data) ?? true,

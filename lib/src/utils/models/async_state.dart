@@ -158,14 +158,6 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
   }
 
   @override
-  bool operator ==(covariant AsyncState<S> other) {
-    return other._status == _status;
-  }
-
-  @override
-  int get hashCode => Object.hash(_status, data, errorState);
-
-  @override
   String toString() {
     switch (_status) {
       case AsyncStatus.loading:

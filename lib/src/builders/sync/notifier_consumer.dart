@@ -34,31 +34,12 @@ class NotifierConsumer<N extends BaseNotifier<S>, S extends Object?>
   ///
   /// [key] is the widget key.
   const NotifierConsumer({
-    required Widget Function(S state) super.builder,
-    required this.listener,
-    this.listenWhen,
-    this.buildWhen,
-    super.notifier,
+    required BuilderCallback<S> super.builder,
+    required super.listener,
+    super.listenWhen,
+    super.buildWhen,
+    super.child,
     super.onInit,
     super.key,
   });
-
-  /// Callback for side effects when the state changes.
-  final void Function(S state) listener;
-
-  /// Optional predicate to determine whether to rebuild when the state changes.
-  ///
-  /// If [buildWhen] returns true, the widget will rebuild. If null, always rebuilds.
-  final bool Function(S previous, S current)? buildWhen;
-
-  /// Optional predicate to determine whether to call [listener] when the state changes.
-  ///
-  /// If [listenWhen] returns true, [listener] will be called. If null, always calls [listener].
-  final bool Function(S previous, S current)? listenWhen;
-
-  @override
-  void whenStateChanged(S previous, S current, VoidCallback reBuild) {
-    if (buildWhen?.call(previous, current) ?? true) reBuild();
-    if (listenWhen?.call(previous, current) ?? true) listener(current);
-  }
 }

@@ -120,6 +120,20 @@ abstract class BaseAsyncState<S extends Object?> {
     void Function()? loading,
     void Function(ErrorState e)? error,
   });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! BaseAsyncState) return false;
+    return other._status == _status &&
+        other.data == data &&
+        other.errorState == errorState;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(_status, data, errorState);
+  }
 }
 
 /// The status of the state.

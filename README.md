@@ -25,21 +25,24 @@ Flutter state management made easy: SyncX is a lightweight, flexible state manag
 
 ## Why SyncX?
 
-- **Simple and familiar API** for Flutter state management.
-- **Reactive UI updates with rebuild control**: Widgets rebuild on state changes, with control over when they update.
-- **Notifier pattern**: Cleanly separates business logic from UI code.
-- **Effortless async state handling**: Easily manage loading, data, and error states.
-- **Minimal boilerplate**: Quick to set up and easy to integrate into any Flutter project.
+- **Simple and familiar API** for Flutter state management, inspired by popular solutions like bloc, provider, and riverpod.
+- **Reactive UI updates with rebuild control**: Widgets rebuild on state changes, with precise control over when they update using `buildWhen` and `listenWhen`.
+- **Notifier pattern**: Cleanly separates business logic from UI code with lifecycle hooks for initialization and state change handling.
+- **Effortless async state handling**: Easily manage loading, data, and error states with specialized async widgets and convenient `.withData` constructors.
+- **Minimal boilerplate**: Quick to set up and easy to integrate into any Flutter project with comprehensive documentation and examples.
 
 ---
 
 ## Features
 
 - 🔄 **Notifier-based state management**: Simple, extendable notifiers for your app's state.
-- 🏗️ **Builder widgets**: Easily rebuild UI in response to state changes.
-- 👂 **Listener widgets**: React to state changes with side effects.
+- 🏗️ **Builder widgets**: Easily rebuild UI in response to state changes with fine-grained control.
+- 👂 **Listener widgets**: React to state changes with side effects without rebuilding UI.
 - 🪶 **Minimal boilerplate**: Focus on your app logic, not on wiring up state.
 - ⚡ **Async state support**: Built-in support for loading, data, and error states in async flows.
+- 🎯 **Convenient APIs**: `.withData` constructors for async widgets provide cleaner, more readable code.
+- 🔄 **Lifecycle hooks**: `onInit` and `onUpdate` methods for initialization and state change handling.
+- 🎛️ **Rebuild control**: `buildWhen` and `listenWhen` predicates for precise control over when widgets rebuild or trigger side effects.
 
 ---
 
@@ -186,13 +189,37 @@ NotifierRegister(
 )
 ```
 
+**Reusing Notifiers Across Navigation:**
+
+SyncX supports reusing notifiers across navigation using `NotifierRegister.value()`:
+
+```dart
+NotifierRegister<CounterNotifier>(
+  create: (context) => CounterNotifier()
+  child: ...,
+)
+
+// When navigating to a new screen, pass notifier
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => NotifierRegister.value(
+      notifier: context.read<CounterNotifier>(),
+      child: DetailScreen(),
+    ),
+  ),
+)
+```
+
+This allows you to share state across different screens, preserve state during navigation, and pass notifiers to dialogs or other overlays.
+
 ### 3. Consume State with Builders & Listeners
 
 **Rebuild UI on State Change:**
 
 ```dart
 NotifierBuilder<CounterNotifier, int>(
-  builder: (context, count) => Text('Count: $count'),
+  builder: (count, child) => Text('Count: $count'),
 )
 ```
 
@@ -201,7 +228,7 @@ NotifierBuilder<CounterNotifier, int>(
 ```dart
 NotifierBuilder<CounterNotifier, int>(
   buildWhen: (prev, curr) => prev != curr,
-  builder: (context, count) => Text('Count: $count'),
+  builder: (count, child) => Text('Count: $count'),
 )
 ```
 
@@ -219,41 +246,218 @@ NotifierListener<CounterNotifier, int>(
 
 ```dart
 NotifierConsumer<CounterNotifier, int>(
-  builder: (context, count) => Text('Count: $count'),
+  builder: (count, child) => Text('Count: $count'),
   listener: (count) => print('Count changed: $count'),
+)
+```
+
+**Control rebuilds and listeners with predicates:**
+```dart
+NotifierBuilder<CounterNotifier, int>(
+  buildWhen: (prev, curr) => curr % 2 == 0, // Only rebuild for even numbers
+  builder: (count, child) => Text('Even Count: $count'),
+)
+
+NotifierListener<CounterNotifier, int>(
+  listenWhen: (prev, curr) => curr > 10, // Only listen when count > 10
+  listener: (count) => print('Count exceeded 10: $count'),
+  child: MyWidget(),
+)
+
+NotifierConsumer<CounterNotifier, int>(
+  buildWhen: (prev, curr) => prev != curr, // Only rebuild when state changes
+  listenWhen: (prev, curr) => curr % 5 == 0, // Only listen for multiples of 5
+  builder: (count, child) => Text('Count: $count'),
+  listener: (count) => print('Count is multiple of 5: $count'),
 )
 ```
 
 **Async State Handling:**
 
-SyncX provides specialized widgets for handling asynchronous state:
-- `AsyncNotifierBuilder` – a wrapper over `NotifierBuilder` for async state, providing a convenient API for loading, data, and error UI.
-- `AsyncNotifierConsumer` – combines building and listening for side effects in async flows.
-- `AsyncNotifierListener` – listens for async state changes and triggers side effects without rebuilding the UI.
+SyncX provides specialized widgets for handling asynchronous state with convenient APIs for loading, data, and error states:
 
-**Direct usage with builder:**
+**AsyncNotifierBuilder** – Rebuilds UI based on async state changes:
 ```dart
+// Direct usage with builder
 AsyncNotifierBuilder<GreetingAsyncNotifier, String>(
-  builder: (context, state) {
+  builder: (state, child) {
     return state.when(
       loading: () => const CircularProgressIndicator(),
       data: (greeting) => Text(greeting),
-      error: (error) => Text('Error: \\${error.message}'),
+      error: (error) => Text('Error: ${error.message}'),
     );
   },
 )
 ```
-
-**Convenient usage with .withData:**
 ```dart
+// Convenient usage with .withData constructor
 AsyncNotifierBuilder<GreetingAsyncNotifier, String>.withData(
-  loadingBuilder: () => CircularProgressIndicator(),
-  dataBuilder: (greeting) => Text(greeting),
-  errorBuilder: (error) => Text('Error: \\${error.message}'),
+  loadingBuilder: (child) => const CircularProgressIndicator(),
+  dataBuilder: (greeting, child) => Text(greeting),
+  errorBuilder: (error, child) => Text('Error: ${error.message}'),
 )
 ```
 
-You can use `AsyncNotifierConsumer` and `AsyncNotifierListener` similarly to handle both UI and side effects for async state.
+**AsyncNotifierConsumer** – Combines building and listening for side effects:
+```dart
+// Direct usage
+AsyncNotifierConsumer<GreetingAsyncNotifier, String>(
+  builder: (state, child) {
+    return state.when(
+      loading: () => const CircularProgressIndicator(),
+      data: (greeting) => Text(greeting),
+      error: (error) => Text('Error: ${error.message}'),
+    );
+  },
+  listener: (state) {
+    state.when(
+      loading: () => print('Loading...'),
+      data: (data) => print('Data loaded: $data'),
+      error: (error) => print('Error: ${error.message}'),
+    );
+  },
+)
+```
+```dart
+// Convenient usage with .withData constructor
+AsyncNotifierConsumer<GreetingAsyncNotifier, String>.withData(
+  loadingBuilder: (child) => const CircularProgressIndicator(),
+  dataBuilder: (greeting, child) => Text(greeting),
+  errorBuilder: (error, child) => Text('Error: ${error.message}'),
+  loadingListener: () => print('Started loading'),
+  dataListener: (data) => print('Data loaded: $data'),
+  errorListener: (error) => print('Error occurred: ${error.message}'),
+)
+```
+
+**AsyncNotifierListener** – Listens for async state changes without rebuilding UI:
+```dart
+// Direct usage
+AsyncNotifierListener<GreetingAsyncNotifier, String>(
+  listener: (state) {
+    state.when(
+      loading: () => print('Loading...'),
+      data: (data) => print('Data loaded: $data'),
+      error: (error) => print('Error: ${error.message}'),
+    );
+  },
+  child: MyWidget(),
+)
+```
+```dart
+// Convenient usage with .withData constructor
+AsyncNotifierListener<GreetingAsyncNotifier, String>.withData(
+  loadingListener: () => print('Started loading'),
+  dataListener: (data) => print('Data loaded: $data'),
+  errorListener: (error) => print('Error occurred: ${error.message}'),
+  child: MyWidget(),
+)
+```
+
+**Control rebuilds and listeners with predicates:**
+```dart
+AsyncNotifierBuilder<GreetingAsyncNotifier, String>.withData(
+  loadingBuilder: (child) => const CircularProgressIndicator(),
+  dataBuilder: (greeting, child) => Text(greeting),
+  errorBuilder: (error, child) => Text('Error: ${error.message}'),
+  buildWhen: (previous, current) => previous != current, // Only rebuild when data changes
+)
+```
+
+**Key Benefits of `.withData` Constructors:**
+
+The `.withData` constructors provide several advantages over the direct builder approach:
+
+- **Cleaner API**: Separate callbacks for loading, data, and error states make the code more readable.
+- **Type Safety**: Each callback receives the correct type (data for dataBuilder, ErrorState for errorBuilder).
+- **Reduced Boilerplate**: No need to manually handle the `state.when()` pattern in every widget.
+- **Consistent Patterns**: All async widgets (Builder, Consumer, Listener) follow the same `.withData` pattern.
+- **Child Support**: Each builder receives an optional `child` parameter for better widget composition.
+
+**Widget Hierarchy and Relationships:**
+
+SyncX provides a consistent widget hierarchy for both sync and async state management:
+
+**Sync Widgets:**
+- `NotifierBuilder` – Rebuilds UI on state changes
+- `NotifierListener` – Listens for side effects without rebuilding
+- `NotifierConsumer` – Combines building and listening
+
+**Async Widgets:**
+- `AsyncNotifierBuilder` – Rebuilds UI on async state changes
+- `AsyncNotifierListener` – Listens for async state side effects
+- `AsyncNotifierConsumer` – Combines async building and listening
+
+All widgets support:
+- **Predicates**: `buildWhen` and `listenWhen` for fine-grained control
+- **Initialization**: `onInit` callback for widget-level setup
+- **Child Composition**: Optional `child` parameter for widget composition
+
+**Callback Signatures:**
+
+**Builder Callbacks:**
+```dart
+// Sync widgets
+Widget Function(S state, Widget? child)
+
+// Async widgets (direct usage)
+Widget Function(BaseAsyncState<S> state, Widget? child)
+
+// Async widgets (.withData usage)
+Widget Function(Widget? child) // loadingBuilder
+Widget Function(S data, Widget? child) // dataBuilder  
+Widget Function(ErrorState error, Widget? child) // errorBuilder
+```
+
+**Listener Callbacks:**
+```dart
+// Sync widgets
+void Function(S state)
+
+// Async widgets (direct usage)
+void Function(BaseAsyncState<S> state)
+
+// Async widgets (.withData usage)
+void Function() // loadingListener
+void Function(S data) // dataListener
+void Function(ErrorState error) // errorListener
+```
+
+**Predicate Callbacks:**
+```dart
+// Sync widgets
+bool Function(S previous, S current)
+
+// Async widgets (.withData usage)
+bool Function(S? previous, S? current) // Only compares data, not full state
+```
+
+**Widget Initialization with `onInit`:**
+
+All SyncX widgets support an optional `onInit` callback that is invoked when the widget is first created:
+
+```dart
+// Sync widgets
+NotifierBuilder<CounterNotifier, int>(
+  onInit: (notifier) {
+    // Custom initialization logic
+    print('Widget initialized with notifier: $notifier');
+  },
+  builder: (count, child) => Text('Count: $count'),
+)
+```
+```dart
+// Async widgets
+AsyncNotifierBuilder<GreetingAsyncNotifier, String>.withData(
+  onInit: (notifier) {
+    // Custom initialization logic
+    print('Async widget initialized with notifier: $notifier');
+  },
+  loadingBuilder: (child) => const CircularProgressIndicator(),
+  dataBuilder: (greeting, child) => Text(greeting),
+  errorBuilder: (error, child) => Text('Error: ${error.message}'),
+)
+```
 
 ### 4. Invoking Notifier Methods
 
@@ -336,14 +540,16 @@ void onUpdate(BaseAsyncState<String> state) {
 - **Listen for Side Effects**: Use `NotifierListener` with `listenWhen` for side-effect logic.
 - **Combine Build and Listen**: Use `NotifierConsumer` for both UI and side effects.
 - **Async State Handling**: Use `AsyncNotifier` and `AsyncState` for loading, data, and error flows.
+- **Convenient Async APIs**: Use `.withData` constructors on async widgets for cleaner, more readable code.
+- **Lifecycle Management**: Override `onInit` and `onUpdate` methods for initialization and state change handling.
 
 ---
 
 ## Future Plans
 
-- **Built-in stream support in notifiers** for easy loading and error state management.
 - **Top-level observer support** to monitor state changes across the app.
-- **Migrate dependency injection (DI) from provider to a custom DI implementation** for more flexibility and control.
+- **Enhanced debugging tools** for better development experience.
+- **Performance optimizations** for large-scale applications.
 
 ---
 
