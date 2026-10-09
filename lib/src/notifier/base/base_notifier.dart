@@ -103,6 +103,16 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   /// The current state held by the notifier.
   S _state;
 
+  /// Whether [dispose] has run.
+  ///
+  /// Work started before disposal, such as an async [AsyncNotifier.onInit],
+  /// checks this before touching the state so a notifier that outlives its
+  /// widget cannot notify listeners that are already gone.
+  bool _disposed = false;
+
+  /// Whether this notifier has been disposed.
+  bool get isDisposed => _disposed;
+
   /// Returns the current state.
   ///
   /// This getter provides read-only access to the current state.
@@ -159,4 +169,10 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   ///
   @protected
   bool stateEqualityCheck(S curr, S next) => curr == next;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
 }

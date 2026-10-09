@@ -36,7 +36,7 @@ jobs:
       - name: Coverage gate
         run: tool/check_coverage.sh
         env:
-          COVERAGE_MIN: 34
+          COVERAGE_MIN: 48
 
       - name: Publish dry run
         run: flutter pub publish --dry-run

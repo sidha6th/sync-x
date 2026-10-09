@@ -11,8 +11,19 @@ part of '../base/base_notifier.dart';
 /// Intended to be used with notifiers that require setup or cleanup, such as starting or cancelling streams.
 mixin AsyncNotifierLifecycle<S> {
   void _initialize(void Function(AsyncState<S> state) whenCompleted) {
-    onInit().then(whenCompleted);
+    onInit().then(
+      (state) {
+        if (!isDisposed) whenCompleted(state);
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        if (isDisposed) return;
+        whenCompleted(AsyncState<S>.error(error, stackTrace: stackTrace));
+      },
+    );
   }
+
+  /// Whether the notifier this mixin is applied to has been disposed.
+  bool get isDisposed;
 
   /// Called when the notifier is first initialized and attached to the widget tree.
   ///
