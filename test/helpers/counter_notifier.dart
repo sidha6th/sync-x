@@ -1,7 +1,7 @@
 import 'package:syncx/syncx.dart';
 
 class CounterNotifier extends Notifier<int> {
-  CounterNotifier([int initial = 0]) : super(initial);
+  CounterNotifier([super.initial = 0]);
 
   int initCount = 0;
   final List<int> updates = <int>[];

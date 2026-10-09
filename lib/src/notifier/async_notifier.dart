@@ -159,7 +159,7 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
       onUpdate: onUpdate,
       equalityCheck: (curr, next) =>
           (equalityCheck?.call(curr.data, next.data) ??
-              this.stateEqualityCheck(curr, next)) &&
+              stateEqualityCheck(curr, next)) &&
           curr == next,
     );
   }

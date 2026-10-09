@@ -11,6 +11,8 @@ analyzer:
     invalid_use_of_protected_member: error
     unawaited_futures: error
     public_member_api_docs: ignore
+  exclude:
+    - build/**
 
 linter:
   rules:

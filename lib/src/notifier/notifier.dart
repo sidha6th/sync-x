@@ -2,7 +2,8 @@ part of 'base/base_notifier.dart';
 
 /// A concrete implementation of [BaseNotifier] that provides a default [setState] behavior.
 ///
-/// [Notifier] updates its state and notifies listeners when [setState] is called, unless the state is unchanged and [forced] is false.
+/// [Notifier] updates its state and notifies listeners when [setState] is called,
+/// unless the state is unchanged and the `forced` argument is false.
 ///
 /// [S] is the type of state managed by the notifier.
 ///

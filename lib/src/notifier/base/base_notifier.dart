@@ -16,7 +16,7 @@ part '../notifier.dart';
 /// The base class for all notifier implementations in SyncX.
 ///
 /// [BaseNotifier] extends [ChangeNotifier] and provides a foundation for state management
-/// with automatic listener notification. It enforces the use of [setState] for state updates
+/// with automatic listener notification. It enforces the use of [Notifier.setState] for state updates
 /// and prevents direct calls to notifyListeners.
 ///
 /// [S] is the type of state managed by the notifier.
@@ -40,9 +40,9 @@ abstract class BaseNotifier<S extends Object?> extends _RootBaseNotifier<S> {
   ///
   /// This method is deprecated and will throw an [UnsupportedError] if called directly.
   ///
-  /// Use [setState] instead to update state and notify listeners automatically.
+  /// Use [Notifier.setState] instead to update state and notify listeners automatically.
   ///
-  /// This ensures that state updates always go through the proper [setState] method,
+  /// This ensures that state updates always go through the proper [Notifier.setState] method,
   /// maintaining consistency and preventing potential bugs.
   @override
   @protected
@@ -86,7 +86,7 @@ abstract class BaseNotifier<S extends Object?> extends _RootBaseNotifier<S> {
 /// Internal base class that provides the core functionality for state management.
 ///
 /// [_RootBaseNotifier] extends [ChangeNotifier] and provides the fundamental state management
-/// capabilities including state storage, state updates via [setState], and listener management.
+/// capabilities including state storage, state updates via [Notifier.setState], and listener management.
 ///
 /// [S] is the type of state managed by the notifier.
 abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
@@ -106,7 +106,7 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   /// Returns the current state.
   ///
   /// This getter provides read-only access to the current state.
-  /// To modify the state, use [setState].
+  /// To modify the state, use [Notifier.setState].
   @protected
   S get state => _state;
 
