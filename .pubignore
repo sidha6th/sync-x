@@ -1,0 +1,10 @@
+PLAN.md
+PHASE1.md
+CONTRIBUTING.md
+.github/
+tool/
+test/
+coverage/
+*.iml
+.idea/
+.vscode/
