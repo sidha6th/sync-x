@@ -19,13 +19,17 @@ Order matters: gates land before fixes, so no fix can regress silently and every
 | `test/helpers/`, `test/src/notifier/notifier_test.dart` | first 10 real tests, so CI has something to gate on |
 | `example/main.dart` | deleted — duplicate of `example/lib/main.dart`, which is the path pub.dev reads |
 
-### Known: the first CI run will likely be red
+### Analyzer result — resolved
 
-The Flutter SDK is not installed on the development machine this plan was written on, so the tightened analyzer could not be run locally. `strict-raw-types` is already known to flag at least one pre-existing violation:
+Flutter stable is now installed at `~/flutter`. The tightened analyzer reported **8 issues, all `info`**, all fixed in `5a68966`:
 
-- `lib/src/utils/extensions/build_context_extensions.dart` — `read<N extends BaseNotifier>()` uses the raw type; the bound must be `BaseNotifier<Object?>`.
+- 6 × `comment_references` — doc comments on `BaseNotifier` and `Notifier` referenced `[setState]` and `[forced]` from scopes where neither is visible. `BaseNotifier` does not declare `setState` at all, so these pointed at nothing; they now point at `Notifier.setState`.
+- 1 × `unnecessary_this` in `async_notifier.dart`.
+- 1 × `use_super_parameters` in the new test helper.
 
-That is the intended sequence, not an accident: tighten the gate, read what it reports, fix the list. Treat the first run's output as the real task list for §1.2 and append anything it finds. Do **not** relax the analyzer to get green — fix the code, or stage one option out with a dated note in this file saying which bug fix will re-enable it.
+`flutter analyze --fatal-infos`, `dart format`, and the test suite are all green.
+
+**Prediction that was wrong:** `strict-raw-types` did *not* flag `read<N extends BaseNotifier>()`. The option covers raw type *annotations*, not raw type-parameter *bounds*. The fix is still worth making, but it belongs to Bug 5 and no gate forces it.
 
 ### Correction to an earlier claim
 
@@ -39,82 +43,51 @@ That is the intended sequence, not an accident: tighten the gate, read what it r
 
 One pull request per numbered item. Every one opens with the failing test and closes with the fix. No batching — a batched PR cannot be reverted cleanly when one fix turns out wrong.
 
-### Bug 1 — `listenWhen` receives a frozen `previous`
+### Bug 1 — `listenWhen` receives a frozen `previous` — FIXED `4cc489e`
 
 **File** `lib/src/builders/base/base_notifier_builder.dart`
 
-`_previous` is assigned only inside the rebuild branch of `buildWithChild`. A pure `NotifierListener` passes no `builder`, so `_shouldWatch` is `false`, that branch never runs, and `_previous` stays at the state captured in `initState` for the widget's whole life. Every `listenWhen(previous, current)` call therefore compares against the initial state. The same freeze happens on a `NotifierConsumer` for as long as `buildWhen` returns `false`.
+Confirmed, with a second cause the original write-up missed. `late S _previous = _notifier.state` is a **lazy** initializer: it first evaluated inside the first notification, by which point the state had already changed. So the very first `listenWhen` call compared a state against itself. On top of that, the field was only advanced in the rebuild branch of `buildWithChild`, which a builder-less `NotifierListener` never reaches.
 
-**Failing test** `listenWhen` receives `(0,1)`, `(1,2)`, `(2,3)` across three consecutive increments. Today the second and third calls both report previous `0`.
+Observed for three consecutive increments: `[[1,1], [1,2], [1,3]]`. Expected `[[0,1], [1,2], [2,3]]`.
 
-**Fix** Move ownership of `_previous` into the notification path, and register the listener unconditionally rather than only when `widget.listener != null`:
+**Fix as shipped** differs from the plan. A single `_previous` cannot serve both predicates: listeners run before the rebuild, so advancing one shared field in the listener path makes `buildWhen` receive `(current, current)`. Split into two fields with the semantics `flutter_bloc` uses:
 
-```dart
-void _triggerListener() {
-  final next = _notifier.state;
-  final shouldCall = widget.listenWhen?.call(_previous, next) ?? true;
-  _previous = next;
-  if (shouldCall) widget.listener?.call(next);
-}
-```
+- `_listenerPrevious` advances on **every** notification, accepted or not.
+- `_builderPrevious` (now `_state`, see Bug 2) advances **only** when a rebuild is accepted, so `buildWhen` keeps comparing against what is on screen.
 
-`buildWithChild` must stop writing `_previous` once this lands, or the two paths will race to advance it.
+Both are assigned eagerly in `initState`.
 
-**Risk** `buildWhen` now sees a `previous` advanced by the listener path. That is the correct bloc-compatible semantic — `previous` means "the state before this change", not "the state at the last rebuild" — but it is an observable behavior change for anyone who wrote `buildWhen` against the buggy behavior. It goes in the 0.2.0 CHANGELOG as a fix with a note.
+**Tests** `test/src/builders/notifier_listener_test.dart`, 4 cases.
 
-### Bug 2 — stale `child` and stale `builder` closure
+### Bug 2 — stale `child` and stale `builder` closure — FIXED `a752cf2`
 
 **File** same
 
-```dart
-return _cachedWidget ??= (widget.builder?.call(state, child) ?? child ?? const SizedBox.shrink());
-```
+Confirmed, but **narrower than claimed and with a deeper cause.** The original write-up said any parent rebuild with a new child would render the stale one. It does not: with the default `buildWhen`, `_shouldRebuild` returned `true`, the first branch ran, and the cache was bypassed. The cache was only reachable when `buildWhen` returned `false`, or when the widget had no builder at all. Both paths were verified broken — a new child rendered nothing (`Found 0 widgets with text "b"`).
 
-`??=` assigns once and never recomputes. When the parent rebuilds with a **new** `child` but the notifier state has not changed, the old cached subtree is returned and the new child is silently dropped. The captured `widget.builder` closure goes stale the same way after a hot reload or a parent rebuild with a new callback.
+**The fix could not be "delete the cache".** Rebuilds were driven by a `Provider.of<N>(context)` dependency, so the element rebuilt on every notification and `buildWhen` was applied *afterwards* to undo it. The cache existed purely to have something to return once a rebuild had already happened; removing it would leave nothing to return.
 
-**Failing test** Mount a `NotifierBuilder` with `child: Text('a')`, rebuild the parent with `child: Text('b')` and no state change, expect `Text('b')`. Today it finds `Text('a')`.
+**Fix as shipped** Drive rebuilds from the notifier and call `setState` only when `buildWhen` accepts — the `flutter_bloc` architecture. `buildWhen` now decides whether a rebuild happens at all instead of discarding one that already did. Consequences:
 
-**Fix** Delete `_cachedWidget` and both of its read sites. Flutter's element diffing already skips subtrees whose widget instances are identical, so the cache buys nothing measurable while costing one retained subtree per builder — a direct violation of the `PLAN.md` §0.2 retention budget. This is the §0.1 rule in action: remove the mechanism, do not add invalidation.
+- no cached subtree; `build` always runs the current builder with the current child
+- `buildWhen` is no longer called during the initial build. It previously ran once at mount comparing the initial state against itself — an extra defect found by the tests, not in the original list.
+- a rejected `buildWhen` costs one predicate call and no element rebuild
+- retention per builder goes from one state reference plus a cached widget subtree to two state references, inside the `CONTRIBUTING.md` budget
 
-**Verification** The §2.4 benchmark must show no regression versus the cached version. If it does regress, the cache comes back only with a measurement attached and a `didUpdateWidget` invalidation.
+**Tests** `test/src/builders/notifier_builder_test.dart`, 9 cases.
 
-### Bug 3 — `AsyncNotifier` notifies after disposal and swallows init failures
+### Bug 3 — notifies after disposal, swallows init failures — FIXED `6ce167c`
 
 **File** `lib/src/notifier/lifecycle_mixin/async_notifier_lifecycle.dart`
 
-```dart
-void _initialize(void Function(AsyncState<S> state) whenCompleted) {
-  onInit().then(whenCompleted);
-}
-```
+Both halves confirmed exactly as written. Disposing before `onInit` resolved threw `A TestAsyncNotifier was used after being disposed`; a throwing `onInit` left the notifier in `loading` with the error unhandled.
 
-Fired from the constructor with no disposal guard and no `onError`. Two separate defects:
+**Fix as shipped** `_disposed` on `_RootBaseNotifier`, set in a `dispose()` override and exposed as a public `isDisposed`. `_initialize` guards the completion and adds an `onError` that routes to `AsyncState.error` with the original error and stack trace.
 
-- Dispose the owning widget before the future resolves and the completion calls `notifyListeners()` on a disposed `ChangeNotifier`: `A <Notifier> was used after being disposed`. This is the crash a user hits by backing out of a screen during a slow network call — the single most reachable bug in the library.
-- An `onInit` that throws becomes an unhandled async error. The notifier never leaves `loading`, so the UI shows a spinner forever with no error surfaced.
+`setState` after disposal is deliberately left throwing on every other path — it is the same contract as `setState` on an unmounted `State`, and silencing it would hide real bugs in user code. `isDisposed` is public so a notifier owning its own async work can check it. This flag is the prerequisite for `fromFuture` / `fromStream` in `PLAN.md` §3.3.
 
-**Failing tests** Two. (a) Build a widget with an `AsyncNotifier` whose `onInit` completes from a `Completer`, unmount, complete the `Completer`, expect no exception and no notification. (b) An `onInit` that throws leaves the state as `error` carrying the original error and stack trace.
-
-**Fix** Add a disposal flag on `_RootBaseNotifier` and guard the completion:
-
-```dart
-void _initialize(void Function(AsyncState<S> state) whenCompleted) {
-  onInit().then(
-    (state) {
-      if (!_disposed) whenCompleted(state);
-    },
-    onError: (Object error, StackTrace stackTrace) {
-      if (!_disposed) {
-        whenCompleted(AsyncState.error(error, stackTrace: stackTrace));
-      }
-    },
-  );
-}
-```
-
-`_RootBaseNotifier` needs a `dispose()` override setting `_disposed = true` before `super.dispose()`. One bool per notifier, inside the §0.2 retention budget. No cancellation token, no subscription registry — those belong to `onDispose` in Phase 3.
-
-**Note** The flag is a prerequisite for `fromFuture` / `fromStream` in `PLAN.md` §3.3. Land it correctly once, here.
+**Tests** `test/src/notifier/async_notifier_test.dart`, 4 cases.
 
 ### Bug 4 — `onInit()` runs before the subclass constructor body
 
@@ -166,6 +139,10 @@ Three defects with one root cause — `_copyWith` is doing load-bearing work it 
 **Fix** Resolve decision **D1** in `PLAN.md` §5 first; the default is to collapse `BaseAsyncState` into `AsyncState`, since one abstract class with exactly one subclass costs a file, a `part` directive and an indirection for nothing (§0.1). Then delete `_copyWith` and write the three transitions explicitly — each one names every field it sets, which is both shorter than a correct `copyWith` and impossible to get wrong.
 
 Whether `data` survives a transition is decision **D2** (default: yes for `toError`, surfaced rather than hidden; the refresh story for `toLoading` is `PLAN.md` §3.2). Either way, §2.2's tests must assert `status`, `data`, and `errorState` explicitly for all nine transitions so the decision is locked in code.
+
+### Bug 11 — `buildWhen` was invoked during the initial build — FIXED with Bug 2
+
+Found by the Bug 2 tests, not in the original list. `buildWhen` ran once at mount, comparing the initial state against itself, so a predicate with logging or any other side effect fired spuriously before any change had occurred. `flutter_bloc` never consults `buildWhen` for the first build. The Bug 2 rework removed the call as a side effect of moving the decision into the notification path.
 
 ### Bug 10 — contradictory equality in `AsyncNotifier.setState`
 
@@ -247,8 +224,8 @@ Phase 1 ships when all of these are true:
 | Step | Work | Blocks |
 |---|---|---|
 | 1 | This change: gates, scripts, lints, `CONTRIBUTING.md`, first tests | everything |
-| 2 | Read the first CI run; append its findings to §1.2 | step 3 |
-| 3 | Bugs 1, 2, 3 — the three that ship wrong behavior today | 0.2.0 |
+| 2 | ~~Read the first CI run~~ — done locally; analyzer clean, 8 infos fixed | step 3 |
+| 3 | ~~Bugs 1, 2, 3~~ — fixed, 27 tests green, coverage 14% → 48% | 0.2.0 |
 | 4 | Bug 5 + the raw-type fix, then §1.3 | clean analyzer |
 | 5 | Decide D1 and D2, then Bugs 6–10 | 0.2.0 |
 | 6 | Bug 4 contract + §1.5 docs pass | 0.2.0 |
