@@ -168,10 +168,18 @@ class BaseNotifierSingleChildBuilderState<N extends BaseNotifier<S>,
   /// This is initialized once and reused throughout the widget's lifecycle.
   late final _notifier = context.read<N>();
 
-  /// The previous state value for comparison.
+  /// The state as it was when the listener last ran.
   ///
-  /// Used to determine if a rebuild is necessary by comparing with the current state.
-  late S _previous = _notifier.state;
+  /// Advances on every notification, whether or not `listenWhen` accepted it,
+  /// so `listenWhen` always receives the state immediately before the change
+  /// it is being asked about.
+  late S _listenerPrevious;
+
+  /// The state as it was when this widget last built.
+  ///
+  /// Advances only when a rebuild is accepted, so `buildWhen` compares against
+  /// what is currently on screen rather than against the latest notification.
+  late S _builderPrevious;
 
   /// Cached widget to avoid unnecessary rebuilds.
   ///
@@ -181,6 +189,8 @@ class BaseNotifierSingleChildBuilderState<N extends BaseNotifier<S>,
   @override
   void initState() {
     super.initState();
+    _listenerPrevious = _notifier.state;
+    _builderPrevious = _listenerPrevious;
     _addListeners();
     widget.onInit?.call(_notifier);
   }
@@ -208,7 +218,7 @@ class BaseNotifierSingleChildBuilderState<N extends BaseNotifier<S>,
     final state =
         _shouldWatch ? Provider.of<N>(context).state : _notifier.state;
     if (_shouldWatch && _shouldRebuild) {
-      _previous = state;
+      _builderPrevious = state;
       _cachedWidget = widget.builder?.call(state, child);
       return _cachedWidget!;
     }
@@ -223,22 +233,10 @@ class BaseNotifierSingleChildBuilderState<N extends BaseNotifier<S>,
   /// This method is called by the notifier's listener mechanism when the state changes.
   /// It checks if the listener should be called based on `listenWhen` logic.
   void _triggerListener() {
-    if (_shouldListen) widget.listener?.call(_notifier.state);
-  }
-
-  /// Determines if the listener should be called for the given state change.
-  ///
-  /// **Logic:**
-  /// 1. Returns `false` if the state hasn't changed
-  /// 2. If `listenWhen` is provided, uses its logic
-  /// 3. Otherwise, returns `true` (always listen)
-  ///
-  /// **Parameters:**
-  /// - `newState`: The current state value
-  ///
-  /// **Returns:** `true` if the listener should be called, `false` otherwise
-  bool get _shouldListen {
-    return (widget.listenWhen?.call(_previous, _notifier.state) ?? true);
+    final next = _notifier.state;
+    final shouldCall = widget.listenWhen?.call(_listenerPrevious, next) ?? true;
+    _listenerPrevious = next;
+    if (shouldCall) widget.listener?.call(next);
   }
 
   /// Determines if the widget should rebuild for the given state change.
@@ -254,7 +252,7 @@ class BaseNotifierSingleChildBuilderState<N extends BaseNotifier<S>,
   ///
   /// **Returns:** `true` if the widget should rebuild, `false` otherwise
   bool get _shouldRebuild {
-    return (widget.buildWhen?.call(_previous, _notifier.state) ?? true);
+    return (widget.buildWhen?.call(_builderPrevious, _notifier.state) ?? true);
   }
 
   /// Determines if the widget should watch the notifier.
