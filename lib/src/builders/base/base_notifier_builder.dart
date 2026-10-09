@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart'
     show BuildContext, SizedBox, State, StatefulWidget, Widget;
-import 'package:provider/provider.dart' show Provider;
 import 'package:provider/single_child_widget.dart'
     show SingleChildStatefulWidget, SingleChildState;
 import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
@@ -157,10 +156,10 @@ abstract class _BaseNotifierBuilder<N extends BaseNotifier<S>,
 /// - **Conditional Logic**: Supports `buildWhen` and `listenWhen` for fine-grained control
 /// - **Initialization**: Calls `onInit` when the widget is first created
 ///
-/// **Performance Optimizations:**
-/// - Caches the built widget to avoid unnecessary rebuilds
-/// - Only rebuilds when state actually changes
-/// - Efficient listener management
+/// **Performance Notes:**
+/// - Rebuilds are driven by the notifier, not by a provider dependency, so a
+///   rejected `buildWhen` costs nothing beyond the predicate call
+/// - Holds one state reference and one listener, and no cached subtree
 class BaseNotifierSingleChildBuilderState<N extends BaseNotifier<S>,
     S extends Object?> extends SingleChildState<_BaseNotifierBuilder<N, S>> {
   /// The notifier instance obtained from the widget tree.
@@ -175,23 +174,19 @@ class BaseNotifierSingleChildBuilderState<N extends BaseNotifier<S>,
   /// it is being asked about.
   late S _listenerPrevious;
 
-  /// The state as it was when this widget last built.
+  /// The state this widget is currently showing.
   ///
-  /// Advances only when a rebuild is accepted, so `buildWhen` compares against
-  /// what is currently on screen rather than against the latest notification.
-  late S _builderPrevious;
-
-  /// Cached widget to avoid unnecessary rebuilds.
-  ///
-  /// This is updated only when the state actually changes and `buildWhen` returns true.
-  Widget? _cachedWidget;
+  /// Advances only when `buildWhen` accepts a change, so the builder and
+  /// `buildWhen` both see what is actually on screen rather than the latest
+  /// notification.
+  late S _state;
 
   @override
   void initState() {
     super.initState();
-    _listenerPrevious = _notifier.state;
-    _builderPrevious = _listenerPrevious;
-    _addListeners();
+    _state = _notifier.state;
+    _listenerPrevious = _state;
+    _notifier.addListener(_onStateChanged);
     widget.onInit?.call(_notifier);
   }
 
@@ -201,72 +196,36 @@ class BaseNotifierSingleChildBuilderState<N extends BaseNotifier<S>,
     super.dispose();
   }
 
-  /// Builds the widget with the current state and optional child.
+  /// Builds with the state currently accepted for display.
   ///
-  /// This method:
-  /// 1. Gets the current state from the notifier
-  /// 2. Compares it with the previous state
-  /// 3. Rebuilds only if necessary (based on `buildWhen` logic)
-  /// 4. Returns the cached widget or builds a new one
-  ///
-  /// **Performance Notes:**
-  /// - Uses caching to avoid unnecessary rebuilds
-  /// - Only calls the builder function when state actually changes
-  /// - Falls back to child or empty widget if no builder is provided
+  /// Falls back to the child, then to an empty box, when no builder is given.
   @override
   Widget buildWithChild(BuildContext context, Widget? child) {
-    final state =
-        _shouldWatch ? Provider.of<N>(context).state : _notifier.state;
-    if (_shouldWatch && _shouldRebuild) {
-      _builderPrevious = state;
-      _cachedWidget = widget.builder?.call(state, child);
-      return _cachedWidget!;
+    return widget.builder?.call(_state, child) ??
+        child ??
+        const SizedBox.shrink();
+  }
+
+  /// Runs the listener and then the rebuild decision for one state change.
+  ///
+  /// The two predicates are independent: `listenWhen` compares against the
+  /// previous notification, `buildWhen` against what is on screen.
+  void _onStateChanged() {
+    final next = _notifier.state;
+
+    if (widget.listener != null) {
+      final shouldCall =
+          widget.listenWhen?.call(_listenerPrevious, next) ?? true;
+      _listenerPrevious = next;
+      if (shouldCall) widget.listener?.call(next);
+    } else {
+      _listenerPrevious = next;
     }
 
-    return _cachedWidget ??= (widget.builder?.call(state, child) ??
-        child ??
-        const SizedBox.shrink());
-  }
+    if (widget.builder == null) return;
+    if (!(widget.buildWhen?.call(_state, next) ?? true)) return;
 
-  /// Triggers the listener function when state changes.
-  ///
-  /// This method is called by the notifier's listener mechanism when the state changes.
-  /// It checks if the listener should be called based on `listenWhen` logic.
-  void _triggerListener() {
-    final next = _notifier.state;
-    final shouldCall = widget.listenWhen?.call(_listenerPrevious, next) ?? true;
-    _listenerPrevious = next;
-    if (shouldCall) widget.listener?.call(next);
-  }
-
-  /// Determines if the widget should rebuild for the given state change.
-  ///
-  /// **Logic:**
-  /// 1. Returns `false` if no builder is provided
-  /// 2. Returns `false` if the state hasn't changed
-  /// 3. If `buildWhen` is provided, uses its logic
-  /// 4. Otherwise, returns `true` (always rebuild)
-  ///
-  /// **Parameters:**
-  /// - `newState`: The current state value
-  ///
-  /// **Returns:** `true` if the widget should rebuild, `false` otherwise
-  bool get _shouldRebuild {
-    return (widget.buildWhen?.call(_builderPrevious, _notifier.state) ?? true);
-  }
-
-  /// Determines if the widget should watch the notifier.
-  ///
-  /// **Returns:** `true` if the widget should watch the notifier, `false` otherwise
-  bool get _shouldWatch => widget.builder != null;
-
-  /// Adds the listener to the notifier if a listener function is provided.
-  ///
-  /// This method is called during `initState` to set up the listener mechanism.
-  /// It only adds the listener if `widget.listener` is not null.
-  void _addListeners() {
-    if (widget.listener == null) return;
-    _notifier.addListener(_triggerListener);
+    setState(() => _state = next);
   }
 
   /// Removes the listener from the notifier.
@@ -274,6 +233,6 @@ class BaseNotifierSingleChildBuilderState<N extends BaseNotifier<S>,
   /// This method is called during `dispose` to clean up the listener mechanism.
   /// It prevents memory leaks by removing the listener when the widget is disposed.
   void _removeListeners() {
-    _notifier.removeListener(_triggerListener);
+    _notifier.removeListener(_onStateChanged);
   }
 }
