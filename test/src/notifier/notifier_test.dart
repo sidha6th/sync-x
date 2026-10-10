@@ -1,4 +1,4 @@
-// ignore_for_file: invalid_use_of_protected_member, deprecated_member_use_from_same_package
+// ignore_for_file: deprecated_member_use_from_same_package
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -86,6 +86,7 @@ void main() {
     });
 
     test('notifyListeners throws UnsupportedError', () {
+      // ignore: invalid_use_of_protected_member
       expect(CounterNotifier().notifyListeners, throwsUnsupportedError);
     });
 

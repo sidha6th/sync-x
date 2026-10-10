@@ -1,5 +1,3 @@
-import 'dart:ui' show VoidCallback;
-
 import 'package:flutter/foundation.dart'
     show
         kFlutterMemoryAllocationsEnabled,
@@ -54,28 +52,6 @@ abstract class BaseNotifier<S extends Object?> extends _RootBaseNotifier<S> {
     );
   }
 
-  /// Adds a listener to be notified when the state changes.
-  ///
-  /// [listener] is the callback function to be called when the state changes.
-  ///
-  /// This method is protected and should be used by the framework, not directly by users.
-  @override
-  @protected
-  void addListener(VoidCallback listener) {
-    super.addListener(listener);
-  }
-
-  /// Removes a previously added listener.
-  ///
-  /// [listener] is the callback function to remove.
-  ///
-  /// This method is protected and should be used by the framework, not directly by users.
-  @override
-  @protected
-  void removeListener(VoidCallback listener) {
-    super.removeListener(listener);
-  }
-
   /// Returns a string representation of the notifier.
   ///
   /// Includes the notifier's identity and current state for debugging purposes.
@@ -115,9 +91,14 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
 
   /// Returns the current state.
   ///
-  /// This getter provides read-only access to the current state.
+  /// This getter provides read-only access to the current state, and is safe to
+  /// read from outside the notifier:
+  ///
+  /// ```dart
+  /// final count = context.read<CounterNotifier>().state;
+  /// ```
+  ///
   /// To modify the state, use [Notifier.setState].
-  @protected
   S get state => _state;
 
   /// Updates the state to [next] and optionally notifies listeners.

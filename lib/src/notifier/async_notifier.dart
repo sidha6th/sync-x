@@ -33,6 +33,25 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   /// // Start with data state
   /// AsyncNotifier<String>.withData('Initial data')
   /// ```
+  /// Dependencies must be reachable before [onInit] runs.
+  ///
+  /// Dart runs a superclass constructor body before the subclass's, and this
+  /// constructor starts [onInit]. A field assigned in the subclass's own
+  /// constructor body is therefore still unset inside [onInit]. Pass
+  /// dependencies as initializing formals or assign them in the initializer
+  /// list:
+  ///
+  /// ```dart
+  /// class UserNotifier extends AsyncNotifier<User> {
+  ///   UserNotifier(this.repository);
+  ///
+  ///   final UserRepository repository;
+  ///
+  ///   @override
+  ///   Future<AsyncState<User>> onInit() async =>
+  ///       AsyncState.data(await repository.current());
+  /// }
+  /// ```
   AsyncNotifier.withData(S data) : super(AsyncState.data(data)) {
     _initialize(setState);
   }
@@ -46,6 +65,25 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   /// ```dart
   /// // Start with loading state
   /// AsyncNotifier<String>()
+  /// ```
+  /// Dependencies must be reachable before [onInit] runs.
+  ///
+  /// Dart runs a superclass constructor body before the subclass's, and this
+  /// constructor starts [onInit]. A field assigned in the subclass's own
+  /// constructor body is therefore still unset inside [onInit]. Pass
+  /// dependencies as initializing formals or assign them in the initializer
+  /// list:
+  ///
+  /// ```dart
+  /// class UserNotifier extends AsyncNotifier<User> {
+  ///   UserNotifier(this.repository);
+  ///
+  ///   final UserRepository repository;
+  ///
+  ///   @override
+  ///   Future<AsyncState<User>> onInit() async =>
+  ///       AsyncState.data(await repository.current());
+  /// }
   /// ```
   AsyncNotifier() : super(const AsyncState.loading()) {
     _initialize(setState);

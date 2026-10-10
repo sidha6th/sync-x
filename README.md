@@ -529,7 +529,7 @@ void onUpdate(BaseAsyncState<String> state) {
     onInit: (notifier) => notifier.onInit(),
     // Do this if you need to call your own custom initialization logic when the widget is created:
     onInit: (notifier) => notifier.doSomethingElse(),
-    builder: (context, state) => Text('State: $state'),
+    builder: (state, child) => Text('State: $state'),
   )
   ```
 ---

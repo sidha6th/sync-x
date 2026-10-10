@@ -24,7 +24,7 @@ mixin NotifierLifecycle<S> {
   /// NotifierBuilder<Notifier, State>(
   ///   // Do NOT do this:
   ///   onInit: (notifier) => notifier.onInit(),
-  ///   builder: (context, state) => Text('State: $state'),
+  ///   builder: (state, child) => Text('State: $state'),
   /// )
   /// ```
   ///
@@ -61,7 +61,7 @@ mixin NotifierLifecycle<S> {
   ///   MyNotifier() : super(0);
   ///
   ///   @override
-  ///   void onUpdated(int state) {
+  ///   void onUpdate(int state) {
   ///     // Log state changes
   ///     print('State updated to: $state');
   ///

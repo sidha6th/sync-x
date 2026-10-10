@@ -1,5 +1,3 @@
-// ignore_for_file: invalid_use_of_protected_member
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart'
     show BuildContext, SizedBox, State, StatefulWidget, Widget;
@@ -81,7 +79,7 @@ abstract class _BaseNotifierBuilder<N extends BaseNotifier<S>,
   ///   onInit: (notifier) {
   ///     notifier.loadData(); // Load data when widget is created
   ///   },
-  ///   builder: (context, data, child) => ListView.builder(
+  ///   builder: (data, child) => ListView.builder(
   ///     itemCount: data.length,
   ///     itemBuilder: (context, index) => ListTile(title: Text(data[index])),
   ///   ),
@@ -98,7 +96,7 @@ abstract class _BaseNotifierBuilder<N extends BaseNotifier<S>,
   /// ```dart
   /// NotifierBuilder<CounterNotifier, int>(
   ///   buildWhen: (previous, current) => current % 2 == 0, // Only rebuild for even numbers
-  ///   builder: (context, count, child) => Text('Even count: $count'),
+  ///   builder: (count, child) => Text('Even count: $count'),
   /// )
   /// ```
   final ShouldProceedCallback<S>? buildWhen;

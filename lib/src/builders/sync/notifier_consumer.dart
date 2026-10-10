@@ -28,7 +28,7 @@ class NotifierConsumer<N extends BaseNotifier<S>, S extends Object?>
   /// NotifierConsumer<Notifier, State>(
   ///   // Do NOT do this:
   ///   onInit: (notifier) => notifier.onInit(),
-  ///   builder: (context, state) => Text('State: $state'),
+  ///   builder: (state, child) => Text('State: $state'),
   /// )
   /// ```
   ///

@@ -54,6 +54,12 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
   /// Returns a new [AsyncState] representing the loading state.
   ///
   /// Use this to transition to a loading state from any other state.
+  ///
+  /// [data] carries over, so a refresh can keep showing the previous value
+  /// while the next one loads. [when] and [whenData] take their `loading`
+  /// branch regardless; read [data] directly to show it.
+  ///
+  /// [errorState] is dropped: a state that is loading is not an error state.
   @override
   AsyncState<S> toLoading() =>
       AsyncState<S>._(status: AsyncStatus.loading, data: data);
@@ -71,6 +77,12 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
   /// [stackTrace] is an optional stack trace for debugging.
   ///
   /// Use this to transition to an error state from any other state.
+  ///
+  /// [data] carries over, so the previous value stays available while the
+  /// error is shown. [when] and [whenData] take their `error` branch
+  /// regardless; read [data] directly to show it. The
+  /// [AsyncState.error] and [AsyncState.errorWithState] constructors have no
+  /// previous value to carry and leave [data] null.
   @override
   AsyncState<S> toError(
     Object error, {

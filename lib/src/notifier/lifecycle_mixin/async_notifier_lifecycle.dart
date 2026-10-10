@@ -39,7 +39,7 @@ mixin AsyncNotifierLifecycle<S> {
   /// NotifierBuilder<Notifier, State>(
   ///   // Do NOT do this:
   ///   onInit: (notifier) => notifier.onInit(),
-  ///   builder: (context, state) => Text('State: $state'),
+  ///   builder: (state, child) => Text('State: $state'),
   /// )
   /// ```
   ///
@@ -80,7 +80,7 @@ mixin AsyncNotifierLifecycle<S> {
   ///   MyAsyncNotifier() : super();
   ///
   ///   @override
-  ///   void onUpdated(BaseAsyncState<String> state) {
+  ///   void onUpdate(BaseAsyncState<String> state) {
   ///     // Log state changes
   ///     print('Async state updated: ${state.runtimeType}');
   ///

@@ -30,6 +30,25 @@ abstract class Notifier<S> extends BaseNotifier<S> with NotifierLifecycle<S> {
   ///   CounterNotifier() : super(0); // Start with initial state of 0
   /// }
   /// ```
+  ///
+  /// Dependencies must be reachable before [onInit] runs.
+  ///
+  /// Dart runs a superclass constructor body before the subclass's, and this
+  /// constructor starts [onInit]. A field assigned in the subclass's own
+  /// constructor body is therefore still unset inside [onInit]. Pass
+  /// dependencies as initializing formals or assign them in the initializer
+  /// list:
+  ///
+  /// ```dart
+  /// class UserNotifier extends Notifier<User?> {
+  ///   UserNotifier(this.repository) : super(null);
+  ///
+  ///   final UserRepository repository;
+  ///
+  ///   @override
+  ///   void onInit() => load();
+  /// }
+  /// ```
   Notifier(super.state) {
     _initialize();
   }
