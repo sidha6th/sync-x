@@ -124,15 +124,16 @@ abstract class BaseAsyncState<S extends Object?> {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    if (other is! BaseAsyncState) return false;
-    return other._status == _status &&
+    if (other.runtimeType != runtimeType) return false;
+    return other is BaseAsyncState<S> &&
+        other._status == _status &&
         other.data == data &&
         other.errorState == errorState;
   }
 
   @override
   int get hashCode {
-    return Object.hash(_status, data, errorState);
+    return Object.hash(runtimeType, _status, data, errorState);
   }
 }
 

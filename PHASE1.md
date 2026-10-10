@@ -89,7 +89,7 @@ Both halves confirmed exactly as written. Disposing before `onInit` resolved thr
 
 **Tests** `test/src/notifier/async_notifier_test.dart`, 4 cases.
 
-### Bug 4 — `onInit()` runs before the subclass constructor body
+### Bug 4 — `onInit()` runs before the subclass constructor body — FIXED
 
 **File** `lib/src/notifier/async_notifier.dart`, `lib/src/notifier/notifier.dart`
 
@@ -101,7 +101,7 @@ Both constructors call `_initialize()` in their body. Dart runs a superclass con
 
 **Explicitly rejected** `Future.microtask(_initialize)`. It appears to fix the ordering by deferring one turn of the event loop — which is exactly the timing dodge `PLAN.md` §0.2 forbids. It would convert a deterministic failure into a timing-dependent one, and it would make `onInit` fire after the first frame, changing the initial-state contract for every existing user.
 
-### Bug 5 — `state` is `@protected`, so nobody can read it
+### Bug 5 — `state` is `@protected`, so nobody can read it — FIXED
 
 **File** `lib/src/notifier/base/base_notifier.dart`
 
@@ -118,7 +118,7 @@ S get state => _state;
 
 **Risk** None for users; this only widens access. The `@protected` removal is not breaking.
 
-### Bug 6 — `AsyncState` equality ignores the type parameter
+### Bug 6 — `AsyncState` equality ignores the type parameter — FIXED
 
 **File** `lib/src/utils/models/base/base_async_state.dart`
 
@@ -126,7 +126,7 @@ S get state => _state;
 
 **Fix** Compare against `BaseAsyncState<S>`.
 
-### Bugs 7–9 — `AsyncState` transitions are internally inconsistent
+### Bugs 7–9 — `AsyncState` transitions are internally inconsistent — FIXED
 
 **File** `lib/src/utils/models/async_state.dart`
 
@@ -232,3 +232,58 @@ Phase 1 ships when all of these are true:
 | 7 | §1.4 pub.dev setup, dry run, tag `v0.2.0` | Phase 2 |
 
 Phase 2's test suite is written in parallel from step 3 onward — every bug fix above contributes its regression test to it, so the two phases share the work instead of duplicating it.
+
+## 1.6 What bugs 4-8 turned out to need
+
+**Bug 4** has no code fix. Dart's constructor ordering is the language, not a
+defect in SyncX, and the only ways to hide it are a deferred `_initialize`
+(rejected above) or a second initialization channel. Both cost more than the
+contract does. `Notifier` and both `AsyncNotifier` constructors now document
+that dependencies must arrive as initializing formals or through the
+initializer list, and `notifier_contract_test.dart` pins both halves: a
+`super`-reachable dependency is visible in `onInit`, a constructor-body one is
+not. The test asserts the limitation so it cannot be fixed by accident and
+left undocumented.
+
+**Bug 5** removed `@protected` from `state`, and removed the `addListener` /
+`removeListener` overrides outright rather than keeping them protected. The
+overrides only called `super`, so they added one annotation each and nothing
+else. `ChangeNotifier` already declares both as public; marking them protected
+broke SyncX's own builders and would break anyone wiring a notifier to
+something other than a SyncX widget. Three lines of `lib/` deleted, and
+`// ignore_for_file: invalid_use_of_protected_member` is gone from
+`base_notifier_builder.dart` with no narrowly-scoped replacement, which §1.3
+had assumed would still be needed. `notifyListeners` stays protected, since
+calling it is the error the override exists to report; the one test that
+asserts it throws carries a single-line `// ignore:`.
+
+**Bug 6** compares `runtimeType` rather than `other is BaseAsyncState<S>`.
+The plan's fix is asymmetric: Dart generics are covariant, so `AsyncState<int>`
+*is* a `BaseAsyncState<num>` and `wide == narrow` would have stayed true while
+`narrow == wide` became false. `runtimeType` is symmetric, and `hashCode`
+includes it so equal states keep equal hashes.
+
+**Bugs 7/8** are decisions D1 and D2, now resolved in favour of the behaviour
+already shipped:
+
+- **D1** `BaseAsyncState` stays. Collapsing it into `AsyncState` is the right
+  call on §0.1 grounds, but `onUpdate(BaseAsyncState<S>)` puts the type in
+  every user's override signature, so it is a breaking change and belongs with
+  one, not in a patch release.
+- **D2** `data` survives `toLoading()` and `toError()`. Keeping the previous
+  value is what makes refresh-in-place and error-with-stale-content possible,
+  and it is reachable — `data` is a public field. What was missing was the
+  documentation saying so, and that `when` / `whenData` branch on status alone
+  and will not hand it back. Both transitions now say it. `errorState` is
+  dropped by `toLoading`, since a loading state is not an error state. The
+  constructors leave `data` null because they have no previous value to carry,
+  which is now stated on `toError` rather than left to be discovered.
+
+Bug 9 was the dead `_copyWith`, already deleted while reaching 100% coverage.
+
+## 1.7 Doc truth pass — done
+
+`builder` takes `(state, child)`, never `(context, ...)`. Six snippets said
+otherwise, in `README.md`, both lifecycle mixins, `NotifierBuilder`,
+`NotifierConsumer` and `_BaseNotifierBuilder`. Two `onUpdate` examples
+declared the override as `onUpdated`, which would not have compiled.

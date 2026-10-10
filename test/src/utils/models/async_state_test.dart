@@ -237,6 +237,15 @@ void main() {
     test('another type is not equal', () {
       expect(const AsyncState<int>.loading() == Object(), isFalse);
     });
+
+    test('a different data type is not equal, in either direction', () {
+      const narrow = AsyncState<int>.data(1);
+      const wide = AsyncState<num>.data(1);
+
+      expect(narrow == wide, isFalse);
+      expect(wide == narrow, isFalse);
+      expect(narrow.hashCode, isNot(wide.hashCode));
+    });
   });
 
   group('AsyncState.toString', () {
