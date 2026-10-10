@@ -6,8 +6,6 @@ class CounterNotifier extends Notifier<int> {
   int initCount = 0;
   final List<int> updates = <int>[];
 
-  int get current => state;
-
   @override
   void onInit() => initCount++;
 
@@ -33,8 +31,6 @@ class CounterNotifier extends Notifier<int> {
 
 class PlainNotifier extends Notifier<int> {
   PlainNotifier() : super(0);
-
-  int get current => state;
 
   void increment() => setState(state + 1);
 }

@@ -8,7 +8,7 @@ import '../../helpers/listener_spy.dart';
 void main() {
   group('Notifier', () {
     test('starts at the initial state', () {
-      expect(CounterNotifier(7).current, 7);
+      expect(CounterNotifier(7).state, 7);
     });
 
     test('onInit runs exactly once per instance', () {
@@ -22,7 +22,7 @@ void main() {
 
       notifier.increment();
 
-      expect(notifier.current, 1);
+      expect(notifier.state, 1);
       expect(spy.calls, 1);
       expect(notifier.updates, <int>[1]);
     });
@@ -57,7 +57,7 @@ void main() {
 
       notifier.set(5, notify: false);
 
-      expect(notifier.current, 5);
+      expect(notifier.state, 5);
       expect(notifier.updates, <int>[5]);
       expect(spy.calls, 0);
     });
@@ -70,7 +70,7 @@ void main() {
 
       notifier.set(-3, equalityCheck: (curr, next) => curr.abs() == next.abs());
 
-      expect(notifier.current, 3);
+      expect(notifier.state, 3);
       expect(spy.calls, 0);
     });
 
@@ -95,7 +95,7 @@ void main() {
 
       notifier.increment();
 
-      expect(notifier.current, 1);
+      expect(notifier.state, 1);
     });
 
     test('toString includes the current state', () {

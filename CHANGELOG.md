@@ -1,3 +1,19 @@
+## 0.2.0
+
+- **Fix**: `listenWhen` received a `previous` value that never advanced, so every comparison after the first was made against the state the widget mounted with. It now receives the state immediately before the change it is being asked about.
+- **Fix**: `NotifierBuilder` and `NotifierConsumer` kept the `child` and the `builder` closure from the build in which they first rebuilt, so a changed `child` or a rebuilt parent could render stale output.
+- **Fix**: Replacing the notifier instance provided above a builder, which `NotifierRegister.value` allows, left the widget listening to the old notifier for the rest of its life.
+- **Fix**: `buildWhen` was consulted once during the initial build, comparing the initial state against itself, so a predicate with side effects fired before any change had occurred.
+- **Fix**: `AsyncNotifier` could notify listeners and overwrite state after disposal when `onInit` completed late, and an `onInit` that failed was swallowed instead of becoming an error state.
+- **Fix**: A custom `equalityCheck` passed to `AsyncNotifier.setState` was combined with the default state equality rather than replacing it, so a check reporting "equal, do not update" still updated whenever any other field differed.
+- **Fix**: `AsyncState` equality ignored its type argument, so `AsyncState<int>.data(1)` equalled `AsyncState<num>.data(1)` and an update that legitimately changed the state's type could be silently refused.
+- **Enhancement**: `state` is now public. `context.read<MyNotifier>().state` was previously an analyzer error for every consumer of the package.
+- **Enhancement**: `addListener` and `removeListener` are no longer marked protected, so a notifier can be wired to widgets other than SyncX's own.
+- **Docs**: `Notifier` and `AsyncNotifier` now document that dependencies must arrive as initializing formals or through the initializer list, because `onInit` runs before the subclass constructor body.
+- **Docs**: `toLoading` and `toError` now document that the previous `data` carries over and is read through the `data` field, since `when` and `whenData` branch on status alone.
+- **Docs**: Corrected builder snippets that still showed the pre-0.1.9 `(context, state)` signature, and two `onUpdate` examples that named the override `onUpdated`.
+- **Internal**: 100% line coverage, enforced in CI alongside formatting, `--fatal-infos` analysis and a publish dry run.
+
 ## 0.1.9
 
 - **BREAKING CHANGE**: Modified builder callback signatures from `(context, state)` to `(state, child)` for all widgets (`NotifierBuilder`, `NotifierConsumer`, `AsyncNotifierBuilder`, `AsyncNotifierConsumer`). This change improves consistency and removes unnecessary context parameter.
