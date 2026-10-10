@@ -30,3 +30,11 @@ class CounterNotifier extends Notifier<int> {
     );
   }
 }
+
+class PlainNotifier extends Notifier<int> {
+  PlainNotifier() : super(0);
+
+  int get current => state;
+
+  void increment() => setState(state + 1);
+}

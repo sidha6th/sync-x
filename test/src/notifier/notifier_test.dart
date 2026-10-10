@@ -89,6 +89,14 @@ void main() {
       expect(CounterNotifier().notifyListeners, throwsUnsupportedError);
     });
 
+    test('the default onUpdate hook accepts a change', () {
+      final notifier = PlainNotifier();
+
+      notifier.increment();
+
+      expect(notifier.current, 1);
+    });
+
     test('toString includes the current state', () {
       expect(CounterNotifier(4).toString(), contains('4'));
     });

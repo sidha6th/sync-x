@@ -55,7 +55,8 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
   ///
   /// Use this to transition to a loading state from any other state.
   @override
-  AsyncState<S> toLoading() => _copyWith(status: AsyncStatus.loading);
+  AsyncState<S> toLoading() =>
+      AsyncState<S>._(status: AsyncStatus.loading, data: data);
 
   /// Returns a new [AsyncState] with the given [data].
   ///
@@ -76,8 +77,9 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
     String? message,
     StackTrace? stackTrace,
   }) {
-    return _copyWith(
+    return AsyncState<S>._(
       status: AsyncStatus.error,
+      data: data,
       errorState: ErrorState(error, message: message, stackTrace: stackTrace),
     );
   }
@@ -123,7 +125,7 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
   /// );
   /// ```
   @override
-  void whenData<T>(
+  void whenData(
     void Function(S data) data, {
     void Function()? loading,
     void Function(ErrorState e)? error,
@@ -136,25 +138,6 @@ class AsyncState<S extends Object?> extends BaseAsyncState<S> {
       case AsyncStatus.data:
         return data(this.data as S);
     }
-  }
-
-  /// Returns a copy of this state with optional new values.
-  ///
-  /// [data] is the new data to hold, if any.
-  /// [isLoading] indicates whether the new state is loading.
-  /// [errorState] is the new error information, if any.
-  ///
-  /// This is used internally for state transitions.
-  AsyncState<S> _copyWith({
-    S? data,
-    AsyncStatus? status,
-    ErrorState? errorState,
-  }) {
-    return AsyncState<S>._(
-      errorState: errorState,
-      data: data ?? this.data,
-      status: status ?? _status,
-    );
   }
 
   @override

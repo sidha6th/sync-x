@@ -25,3 +25,41 @@ class ThrowingAsyncNotifier extends AsyncNotifier<String> {
   Future<AsyncState<String>> onInit() =>
       Future<AsyncState<String>>.error(error, stackTrace);
 }
+
+class ControllableAsyncNotifier extends AsyncNotifier<String> {
+  ControllableAsyncNotifier() : super.withData('initial');
+
+  AsyncState<String> get current => state as AsyncState<String>;
+
+  final List<BaseAsyncState<String>> updates = <BaseAsyncState<String>>[];
+
+  @override
+  Future<AsyncState<String>> onInit() async => current;
+
+  @override
+  void onUpdate(BaseAsyncState<String> state) => updates.add(state);
+
+  void toLoading() => setLoading();
+
+  void toData(String data, {bool forced = false, bool notify = true}) {
+    setData(data, forced: forced, notify: notify);
+  }
+
+  void toError(Object error, {String? message, StackTrace? stackTrace}) {
+    setError(error, message: message, stackTrace: stackTrace);
+  }
+
+  void replace(
+    AsyncState<String> next, {
+    bool notify = true,
+    bool forced = false,
+    bool Function(String? curr, String? next)? equalityCheck,
+  }) {
+    setState(
+      next,
+      notify: notify,
+      forced: forced,
+      equalityCheck: equalityCheck,
+    );
+  }
+}

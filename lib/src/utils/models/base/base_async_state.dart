@@ -115,7 +115,7 @@ abstract class BaseAsyncState<S extends Object?> {
   ///   error: (error) => print('Error: ${error.message}'),
   /// );
   /// ```
-  void whenData<T>(
+  void whenData(
     void Function(S data) data, {
     void Function()? loading,
     void Function(ErrorState e)? error,
