@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart'
     show BuildContext, SizedBox, State, StatefulWidget, Widget;
+import 'package:provider/provider.dart' show SelectContext;
 import 'package:provider/single_child_widget.dart'
     show SingleChildStatefulWidget, SingleChildState;
 import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
@@ -12,6 +13,9 @@ import 'package:syncx/src/utils/type.dart';
 part '../sync/notifier_builder.dart';
 part '../sync/notifier_consumer.dart';
 part '../sync/notifier_listener.dart';
+
+/// Returns its argument, used as a selector that depends on identity alone.
+T _identity<T>(T value) => value;
 
 /// Base abstract class for creating notifier-based widgets that can build, listen, and consume.
 ///
@@ -162,10 +166,12 @@ abstract class _BaseNotifierBuilder<N extends BaseNotifier<S>,
 /// - Holds one state reference and one listener, and no cached subtree
 class BaseNotifierSingleChildBuilderState<N extends BaseNotifier<S>,
     S extends Object?> extends SingleChildState<_BaseNotifierBuilder<N, S>> {
-  /// The notifier instance obtained from the widget tree.
+  /// The notifier currently provided above this widget.
   ///
-  /// This is initialized once and reused throughout the widget's lifecycle.
-  late final _notifier = context.read<N>();
+  /// Re-read on every build so that replacing the provided instance, as
+  /// `NotifierRegister.value` allows, rebinds the listener instead of leaving
+  /// this widget attached to the old notifier for the rest of its life.
+  late N _notifier = context.read<N>();
 
   /// The state as it was when the listener last ran.
   ///
@@ -198,12 +204,30 @@ class BaseNotifierSingleChildBuilderState<N extends BaseNotifier<S>,
 
   /// Builds with the state currently accepted for display.
   ///
-  /// Falls back to the child, then to an empty box, when no builder is given.
+  /// Selects the notifier by identity, so this widget depends on *which*
+  /// notifier is provided without rebuilding every time that notifier
+  /// notifies. Falls back to the child, then to an empty box, when no builder
+  /// is given.
   @override
   Widget buildWithChild(BuildContext context, Widget? child) {
+    final provided = context.select<N, N>(_identity);
+    if (!identical(provided, _notifier)) _rebind(provided);
+
     return widget.builder?.call(_state, child) ??
         child ??
         const SizedBox.shrink();
+  }
+
+  /// Moves the listener from the previous notifier to [next].
+  ///
+  /// Called from `build`, so the state is assigned directly rather than
+  /// through `setState`: this build is already the one that will show it.
+  void _rebind(N next) {
+    _notifier.removeListener(_onStateChanged);
+    _notifier = next;
+    _state = next.state;
+    _listenerPrevious = _state;
+    next.addListener(_onStateChanged);
   }
 
   /// Runs the listener and then the rebuild decision for one state change.
@@ -223,9 +247,11 @@ class BaseNotifierSingleChildBuilderState<N extends BaseNotifier<S>,
     }
 
     if (widget.builder == null) return;
-    if (!(widget.buildWhen?.call(_state, next) ?? true)) return;
 
-    setState(() => _state = next);
+    final current = _notifier.state;
+    if (!(widget.buildWhen?.call(_state, current) ?? true)) return;
+
+    setState(() => _state = current);
   }
 
   /// Removes the listener from the notifier.
