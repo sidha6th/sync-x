@@ -1,13 +1,18 @@
 import 'package:flutter/widgets.dart'
     show StatelessWidget, BuildContext, Widget;
-import 'package:provider/provider.dart' show ChangeNotifierProvider;
+import 'package:provider/provider.dart' show InheritedProvider;
 import 'package:syncx/src/notifier/base/base_notifier.dart';
 
-/// A widget that registers a [BaseNotifier] in the widget tree using [ChangeNotifierProvider].
+/// A widget that registers a [BaseNotifier] in the widget tree.
 ///
-/// [NotifierRegister] is a convenience widget for providing a notifier to its descendants,
-/// making it accessible throughout the widget subtree. It acts as a wrapper around
-/// Flutter's [ChangeNotifierProvider] with SyncX-specific optimizations.
+/// [NotifierRegister] is a convenience widget for providing a notifier to its
+/// descendants, making it accessible throughout the widget subtree.
+///
+/// It provides the notifier without subscribing to it. SyncX's builders attach
+/// their own listener to the notifier directly, so nothing here has to rebuild
+/// when the state changes. That keeps a state change from marking this widget
+/// dirty, which would otherwise throw whenever a notifier was updated while a
+/// descendant was still initializing.
 ///
 /// [N] is the type of [BaseNotifier].
 ///
@@ -134,7 +139,7 @@ class NotifierRegister<N extends BaseNotifier<Object?>>
   @override
   Widget build(BuildContext context) {
     if (create == null) {
-      return ChangeNotifierProvider.value(
+      return InheritedProvider<N>.value(
         key: key,
         value: notifier!,
         builder: builder,
@@ -142,12 +147,20 @@ class NotifierRegister<N extends BaseNotifier<Object?>>
       );
     }
 
-    return ChangeNotifierProvider(
+    return InheritedProvider<N>(
       key: key,
       lazy: lazy,
       create: create!,
+      dispose: _dispose,
       builder: builder,
       child: child,
     );
+  }
+
+  static void _dispose<N extends BaseNotifier<Object?>>(
+    BuildContext context,
+    N notifier,
+  ) {
+    notifier.dispose();
   }
 }
