@@ -32,4 +32,5 @@ build/
 
 
 #vscode
-.vscode/
+.vscode
+coverage/

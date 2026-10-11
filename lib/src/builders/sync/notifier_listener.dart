@@ -30,23 +30,9 @@ class NotifierListener<N extends BaseNotifier<S>, S extends Object?>
   /// [key] is the widget key.
   const NotifierListener({
     required Widget super.child,
-    required this.listener,
-    this.listenWhen,
-    super.notifier,
+    required void Function(S state) super.listener,
+    super.listenWhen,
     super.onInit,
     super.key,
   });
-
-  /// Callback for side effects when the state changes.
-  final void Function(S state) listener;
-
-  /// Optional predicate to determine whether to call [listener] when the state changes.
-  ///
-  /// If [listenWhen] returns true, [listener] will be called. If null, always calls [listener].
-  final bool Function(S previous, S current)? listenWhen;
-
-  @override
-  void whenStateChanged(S previous, S current, _) {
-    if (listenWhen?.call(previous, current) ?? true) listener(current);
-  }
 }

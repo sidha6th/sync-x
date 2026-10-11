@@ -4,6 +4,8 @@ import 'package:syncx/syncx.dart';
 class GreetingAsyncNotifier extends AsyncNotifier<String> {
   GreetingAsyncNotifier() : super();
 
+  int count = 0;
+
   @override
   Future<AsyncState<String>> onInit() async {
     // Simulate async loading
@@ -15,15 +17,13 @@ class GreetingAsyncNotifier extends AsyncNotifier<String> {
   }
 
   Future<void> updateState() async {
+    count++;
     setLoading();
     // Consider this as a Network call
     await Future.delayed(const Duration(seconds: 2));
-    final bool isSuccess = true; // Set to false to simulate error
-    if (isSuccess) {
+    if (count % 2 == 0) {
       return setData('Refreshed Successfully');
     }
-
-    // Replace 'errorObject' with your actual error object as needed
-    // return setError('Failed to refresh', message: 'Failed to refresh');
+    return setError('Failed to refresh', message: 'Failed to refresh');
   }
 }

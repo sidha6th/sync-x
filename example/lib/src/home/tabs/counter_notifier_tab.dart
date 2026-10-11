@@ -21,7 +21,7 @@ class CounterNotifierTab extends StatelessWidget {
               );
             },
             buildWhen: (prev, curr) => prev != curr,
-            builder: (count) => Text(
+            builder: (count, _) => Text(
               'Count: $count',
               style: Theme.of(context).textTheme.headlineMedium,
             ),

@@ -2,11 +2,10 @@ import 'package:flutter/widgets.dart' show VoidCallback;
 import 'package:syncx/src/builders/base/base_notifier_builder.dart'
     show NotifierListener;
 import 'package:syncx/src/notifier/base/base_notifier.dart' show BaseNotifier;
-import 'package:syncx/src/utils/models/async_state.dart';
-import 'package:syncx/src/utils/models/base/base_async_state.dart';
+import 'package:syncx/src/utils/models/async_state.dart' show BaseAsyncState;
 import 'package:syncx/src/utils/models/error_state.dart';
 
-/// A widget that listens for changes in the [AsyncState] of the provided [BaseNotifier] and triggers side effects.
+/// A widget that listens for changes in the [BaseAsyncState] of the provided [BaseNotifier] and triggers side effects.
 ///
 /// [AsyncNotifierListener] is a convenience widget for listening to an asynchronous [BaseNotifier]
 /// and performing side effects via listeners when the state changes, without rebuilding the UI.
@@ -19,14 +18,13 @@ class AsyncNotifierListener<N extends BaseNotifier<BaseAsyncState<S>>,
     required super.child,
     required super.listener,
     super.listenWhen,
-    super.notifier,
     super.onInit,
     super.key,
   });
 
   ///
   /// [dataListener], [loadingListener], and [errorListener] are optional callbacks invoked for side effects
-  /// when the state is [AsyncState.data], [AsyncState.loading], or [AsyncState.error], respectively.
+  /// when the state is [BaseAsyncState.data], [BaseAsyncState.loading], or [BaseAsyncState.error], respectively.
   ///
   /// [listenWhen] is an optional predicate that determines whether to call listeners when the data changes.
   ///
@@ -52,16 +50,15 @@ class AsyncNotifierListener<N extends BaseNotifier<BaseAsyncState<S>>,
   AsyncNotifierListener.withData({
     required super.child,
 
-    /// Optional callback for side effects when the state is [AsyncState.data].
+    /// Optional callback for side effects when the state is [BaseAsyncState.data].
     final void Function(S data)? dataListener,
 
-    /// Optional callback for side effects when the state is [AsyncState.loading].
+    /// Optional callback for side effects when the state is [BaseAsyncState.loading].
     final VoidCallback? loadingListener,
 
-    /// Optional callback for side effects when the state is [AsyncState.error].
+    /// Optional callback for side effects when the state is [BaseAsyncState.error].
     final void Function(ErrorState error)? errorListener,
     bool Function(S? previous, S? current)? listenWhen,
-    super.notifier,
     super.onInit,
     super.key,
   }) : super(

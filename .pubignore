@@ -1,0 +1,17 @@
+.DS_Store
+.dart_tool/
+.packages
+build/
+coverage/
+pubspec.lock
+*.log
+*.iml
+.idea/
+.vscode/
+.github/
+tool/
+test/
+example/
+PLAN.md
+PHASE1.md
+CONTRIBUTING.md

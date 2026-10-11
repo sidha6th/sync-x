@@ -33,6 +33,25 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   /// // Start with data state
   /// AsyncNotifier<String>.withData('Initial data')
   /// ```
+  /// Dependencies must be reachable before [onInit] runs.
+  ///
+  /// Dart runs a superclass constructor body before the subclass's, and this
+  /// constructor starts [onInit]. A field assigned in the subclass's own
+  /// constructor body is therefore still unset inside [onInit]. Pass
+  /// dependencies as initializing formals or assign them in the initializer
+  /// list:
+  ///
+  /// ```dart
+  /// class UserNotifier extends AsyncNotifier<User> {
+  ///   UserNotifier(this.repository);
+  ///
+  ///   final UserRepository repository;
+  ///
+  ///   @override
+  ///   Future<AsyncState<User>> onInit() async =>
+  ///       AsyncState.data(await repository.current());
+  /// }
+  /// ```
   AsyncNotifier.withData(S data) : super(AsyncState.data(data)) {
     _initialize(setState);
   }
@@ -46,6 +65,25 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   /// ```dart
   /// // Start with loading state
   /// AsyncNotifier<String>()
+  /// ```
+  /// Dependencies must be reachable before [onInit] runs.
+  ///
+  /// Dart runs a superclass constructor body before the subclass's, and this
+  /// constructor starts [onInit]. A field assigned in the subclass's own
+  /// constructor body is therefore still unset inside [onInit]. Pass
+  /// dependencies as initializing formals or assign them in the initializer
+  /// list:
+  ///
+  /// ```dart
+  /// class UserNotifier extends AsyncNotifier<User> {
+  ///   UserNotifier(this.repository);
+  ///
+  ///   final UserRepository repository;
+  ///
+  ///   @override
+  ///   Future<AsyncState<User>> onInit() async =>
+  ///       AsyncState.data(await repository.current());
+  /// }
   /// ```
   AsyncNotifier() : super(const AsyncState.loading()) {
     _initialize(setState);
@@ -63,11 +101,13 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   /// }
   /// ```
   @protected
-  void setLoading() => setState(state.toLoading());
+  void setLoading() => setState(state.toLoading(), forced: true);
 
   /// Transitions the notifier to the data state with the given [data].
   ///
   /// [data] is the successful result of the async operation.
+  /// [forced] (default: false): Forces the state update even if the value hasn't changed.
+  /// [notify] (default: true): Controls whether listeners are notified and the UI is rebuilt.
   ///
   /// Use this when an async operation completes successfully.
   ///
@@ -76,9 +116,27 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
   /// void onDataReceived(String data) {
   ///   setData(data);
   /// }
+  ///
+  /// void updateSilently(String data) {
+  ///   setData(data, notify: false); // Update without notifying listeners
+  /// }
+  ///
+  /// void forceUpdate(String data) {
+  ///   setData(data, forced: true); // Updates the state bypassing the equality check
+  /// }
   /// ```
   @protected
-  void setData(S data) => setState(state.toData(data));
+  void setData(
+    S data, {
+    bool forced = false,
+    bool notify = true,
+  }) {
+    return setState(
+      notify: notify,
+      forced: forced,
+      state.toData(data),
+    );
+  }
 
   /// Transitions the notifier to the error state with the given error information.
   ///
@@ -106,6 +164,54 @@ abstract class AsyncNotifier<S> extends BaseNotifier<BaseAsyncState<S>>
         message: message,
         stackTrace: stackTrace,
       ),
+      forced: true,
     );
   }
+
+  /// Updates the state with the given [next] state.
+  ///
+  /// [next] is the new state to set.
+  /// [notify] (default: true): Controls whether listeners are notified and the UI is rebuilt.
+  /// [forced] (default: false): Forces the state update even if the value hasn't changed.
+  /// [equalityCheck] (optional): Custom function to determine if state has changed.
+  ///
+  /// This method provides fine-grained control over state updates and listener notifications.
+  ///
+  /// Example:
+  /// ```dart
+  /// void updateState(BaseAsyncState<String> newState) {
+  ///   setState(newState, notify: true, forced: false);
+  /// }
+  /// ```
+  @protected
+  void setState(
+    BaseAsyncState<S> next, {
+    bool notify = true,
+    bool forced = false,
+    bool Function(S? curr, S? next)? equalityCheck,
+  }) {
+    _setState(
+      next,
+      notify: notify,
+      forced: forced,
+      onUpdate: onUpdate,
+      equalityCheck: equalityCheck == null
+          ? null
+          : (curr, next) => equalityCheck(curr.data, next.data),
+    );
+  }
+
+  /// Custom equality check for async states.
+  ///
+  /// Compares the data fields of two async states to determine if they are equal.
+  /// Override this method to provide custom equality logic.
+  ///
+  /// [curr] is the current state.
+  /// [next] is the new state.
+  ///
+  /// Returns true if the states are considered equal, false otherwise.
+  @override
+  @protected
+  bool stateEqualityCheck(BaseAsyncState<S> curr, BaseAsyncState<S> next) =>
+      curr == next;
 }

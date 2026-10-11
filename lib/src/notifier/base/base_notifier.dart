@@ -1,14 +1,10 @@
-import 'dart:ui' show VoidCallback;
-
 import 'package:flutter/foundation.dart'
     show
         kFlutterMemoryAllocationsEnabled,
         ChangeNotifier,
         protected,
-        mustCallSuper,
         describeIdentity;
 import 'package:syncx/src/utils/models/async_state.dart';
-import 'package:syncx/src/utils/models/base/base_async_state.dart';
 
 part '../async_notifier.dart';
 part '../lifecycle_mixin/async_notifier_lifecycle.dart';
@@ -18,7 +14,7 @@ part '../notifier.dart';
 /// The base class for all notifier implementations in SyncX.
 ///
 /// [BaseNotifier] extends [ChangeNotifier] and provides a foundation for state management
-/// with automatic listener notification. It enforces the use of [setState] for state updates
+/// with automatic listener notification. It enforces the use of [Notifier.setState] for state updates
 /// and prevents direct calls to notifyListeners.
 ///
 /// [S] is the type of state managed by the notifier.
@@ -42,9 +38,9 @@ abstract class BaseNotifier<S extends Object?> extends _RootBaseNotifier<S> {
   ///
   /// This method is deprecated and will throw an [UnsupportedError] if called directly.
   ///
-  /// Use [setState] instead to update state and notify listeners automatically.
+  /// Use [Notifier.setState] instead to update state and notify listeners automatically.
   ///
-  /// This ensures that state updates always go through the proper [setState] method,
+  /// This ensures that state updates always go through the proper [Notifier.setState] method,
   /// maintaining consistency and preventing potential bugs.
   @override
   @protected
@@ -54,28 +50,6 @@ abstract class BaseNotifier<S extends Object?> extends _RootBaseNotifier<S> {
       'Direct calls to notifyListeners() are not allowed. '
       'Use setState() to update state and notify listeners.',
     );
-  }
-
-  /// Adds a listener to be notified when the state changes.
-  ///
-  /// [listener] is the callback function to be called when the state changes.
-  ///
-  /// This method is protected and should be used by the framework, not directly by users.
-  @override
-  @protected
-  void addListener(VoidCallback listener) {
-    super.addListener(listener);
-  }
-
-  /// Removes a previously added listener.
-  ///
-  /// [listener] is the callback function to remove.
-  ///
-  /// This method is protected and should be used by the framework, not directly by users.
-  @override
-  @protected
-  void removeListener(VoidCallback listener) {
-    super.removeListener(listener);
   }
 
   /// Returns a string representation of the notifier.
@@ -88,7 +62,7 @@ abstract class BaseNotifier<S extends Object?> extends _RootBaseNotifier<S> {
 /// Internal base class that provides the core functionality for state management.
 ///
 /// [_RootBaseNotifier] extends [ChangeNotifier] and provides the fundamental state management
-/// capabilities including state storage, state updates via [setState], and listener management.
+/// capabilities including state storage, state updates via [Notifier.setState], and listener management.
 ///
 /// [S] is the type of state managed by the notifier.
 abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
@@ -105,16 +79,31 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   /// The current state held by the notifier.
   S _state;
 
+  /// Whether [dispose] has run.
+  ///
+  /// Work started before disposal, such as an async [AsyncNotifier.onInit],
+  /// checks this before touching the state so a notifier that outlives its
+  /// widget cannot notify listeners that are already gone.
+  bool _disposed = false;
+
+  /// Whether this notifier has been disposed.
+  bool get isDisposed => _disposed;
+
   /// Returns the current state.
   ///
-  /// This getter provides read-only access to the current state.
-  /// To modify the state, use [setState].
-  @protected
+  /// This getter provides read-only access to the current state, and is safe to
+  /// read from outside the notifier:
+  ///
+  /// ```dart
+  /// final count = context.read<CounterNotifier>().state;
+  /// ```
+  ///
+  /// To modify the state, use [Notifier.setState].
   S get state => _state;
 
-  /// Updates the state to [newState] and optionally notifies listeners.
+  /// Updates the state to [next] and optionally notifies listeners.
   ///
-  /// [newState] is the new state value to set.
+  /// [next] is the new state value to set.
   /// [forced] can be set to true to force the update even if the state is unchanged.
   ///   This is useful for manipulating iterable state where the reference might not change.
   /// [notify] controls whether listeners are notified after the update.
@@ -131,10 +120,40 @@ abstract class _RootBaseNotifier<S extends Object?> with ChangeNotifier {
   /// // Update without notifying listeners
   /// setState(newValue, notify: false);
   /// ```
-  @protected
-  @mustCallSuper
-  void setState(S newState, {bool forced = false, bool notify = true}) {
-    if (!identical(state, newState) || forced) _state = newState;
+  void _setState(
+    S next, {
+    bool notify = true,
+    bool forced = false,
+    void Function(S state)? onUpdate,
+    bool Function(S curr, S next)? equalityCheck,
+  }) {
+    final shouldUpdate = forced ||
+        !(equalityCheck?.call(_state, next) ??
+            stateEqualityCheck(_state, next));
+    if (!shouldUpdate) return;
+
+    _state = next;
+    onUpdate?.call(next);
     if (notify) super.notifyListeners();
+  }
+
+  /// A basic equality check that compares the current and next states using the `==` operator.
+  ///
+  /// This method is used as a default equality check when no custom equality check is provided.
+  /// It checks if the current and next states are equal using the `==` operator and also considers
+  /// object identity using [identical].
+  ///
+  /// [curr] is the current state.
+  /// [next] is the next state to compare.
+  ///
+  /// Returns `true` if the states are equal, otherwise `false`.
+  ///
+  @protected
+  bool stateEqualityCheck(S curr, S next) => curr == next;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 }
