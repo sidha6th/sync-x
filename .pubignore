@@ -11,7 +11,11 @@ pubspec.lock
 .github/
 tool/
 test/
-example/
 PLAN.md
 PHASE1.md
 CONTRIBUTING.md
+example/.dart_tool/
+example/build/
+example/pubspec.lock
+example/web/
+example/*.iml

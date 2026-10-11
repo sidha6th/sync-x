@@ -1,3 +1,8 @@
+## 0.2.1
+
+- **Fix**: The `example/` directory was missing from the published archive, so pub.dev reported "No example found" and scored the package 0/10 for having an example. A `.pubignore` replaces `.gitignore` rather than adding to it, and the one added in 0.2.0 excluded the whole example directory instead of only its build output.
+- **Docs**: Documented `BuildContextExtensions` and `BuildContextExtensions.read`, the two public API elements that had no dartdoc comment.
+
 ## 0.2.0
 
 - **Fix**: `listenWhen` received a `previous` value that never advanced, so every comparison after the first was made against the state the widget mounted with. It now receives the state immediately before the change it is being asked about.
